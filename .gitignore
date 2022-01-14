@@ -30,3 +30,28 @@
 *.exe
 *.out
 *.app
+
+# NodeJS
+*.target.mk
+*.gypi
+*Makefile
+
+# VSCode
+.vscode
+
+# Misc
+*.log
+.*.swp
+.*.swo
+.env
+
+# package directories
+node_modules
+jspm_packages
+build
+
+# Serverless directories
+.serverless
+
+# CSV
+*.csv

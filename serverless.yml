@@ -1,0 +1,65 @@
+service: syngenta-api
+
+plugins:
+  - serverless-localstack
+  - serverless-offline
+  - serverless-dotenv-plugin
+
+custom:
+  serverless-offline:
+    httpPort: 4000
+  localstack:
+    host: http://localhost # optional - LocalStack host to connect to
+    edgePort: 4566 # optional - LocalStack edge port to connect to
+frameworkVersion: "2"
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: 20201221
+  timeout: 20
+  endpointType: REGIONAL
+  httpApi:
+    cors: true
+
+functions:
+  health:
+    handler: sls/Repo.health
+    events:
+      - http:
+          method: get
+          path: /health
+          cors: true
+          timeout: 20
+          request:
+            parameters:
+              querystrings:
+                url: true
+          response:
+            headers:
+              Content-Type: "'application/json'"
+  repo_info:
+    handler: src/Repo.get_info
+    events:
+      - http:
+          method: post
+          path: /get_info
+          cors: true
+          response:
+            headers:
+              Content-Type: "'application/json'"
+  webhook:
+    handler: sls/Repo.webhook
+    events:
+      - http:
+          method: post
+          path: /webhook
+          cors: true
+          timeout: 20
+          request:
+            parameters:
+              querystrings:
+                url: true
+          response:
+            headers:
+              Content-Type: "'application/json'"
