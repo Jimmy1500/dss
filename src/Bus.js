@@ -48,11 +48,7 @@ class Bus {
         });
     }
 
-    encode(array) {
-        const object = { };
-        encode(array, object);
-        return object;
-    }
+    encode(array) { const object = {}; encode(array, object); return object; }
 
     /* --------------- primary interface --------------- */
 
@@ -62,7 +58,7 @@ class Bus {
     async push(topic, event, event_id = null) {
         const id = event_id || '*';
         if ( !event ) { throw new EvalError("cannot push empty event"); }
-        if ( typeof event == 'string' ) {
+        if ( typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean' ) {
             return this.redis_.xadd(topic, id, ['body', event]);
         } else if ( event instanceof Object || Array.isArray(event) ) {
             return this.redis_.xadd(topic, id, ['body', JSON.stringify(event)]);
@@ -112,13 +108,15 @@ class Bus {
         return last_id;
     }
 
-    set(key, val) {
-        if (typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean') {
-            return this.redis_.set(key, val)
+    /* cache */
+    async set(key, val) {
+        if ( typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean' ) {
+            return await this.redis_.set(key, val);
+        } else if ( val instanceof Object || Array.isArray(val) ) {
+            return await this.redis_.set(key, JSON.stringify(val));
         }
         throw new TypeError(`invalid cache type ${val}: ${typeof val}`)
     }
-
     async get(key) {
         return new Promise((resolve, reject) => {
             this.redis_.get(key, (err, val) => {
@@ -127,12 +125,14 @@ class Bus {
             });
         });
     }
+
+    /* clean */
     async del(key) { return await this.redis_.del(key) }
     async free(topic_name, event_id) {
         await this.redis_.xdel(topic_name, event_id);
         await this.redis_.del(event_id);
     }
-
+    async flush() { await this.redis_.flushall(); }
     async sleep(ms) { return new Promise((resolve) => { setTimeout(resolve, ms); }); }
 }; // class Bus
 
