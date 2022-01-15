@@ -92,7 +92,8 @@ class Bus {
                         if ( !done ) { failed = true; }
                         if ( !failed ) {
                             if ( Array.isArray(topic) ) {
-                                last_id[topic.length > 1 ? topic.findIndex(name => name == topic_name) : 0] = event.id;
+                                const topic_index = topic.length > 1 ? topic.findIndex(name => name == topic_name) : 0;
+                                last_id[topic_index] = event.id;
                             } else {
                                 last_id = event.id;
                             }
@@ -120,8 +121,8 @@ class Bus {
     async get(key) {
         return new Promise((resolve, reject) => {
             this.redis_.get(key, (err, val) => {
-                if (err) { reject(err) }
-                else { resolve(val) }
+                if (err) { reject(err); }
+                else { resolve(val); }
             });
         });
     }
