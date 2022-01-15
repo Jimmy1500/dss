@@ -10,17 +10,9 @@ RUN npm install --global yarn
 RUN yarn global add node-gyp --prefix /usr/local
 
 WORKDIR /lab
-# aws cli (version 2)
-# RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-# RUN unzip awscliv2.zip
-# RUN ./aws/install
-
-# glog && pugixml
-RUN git clone -b master https://github.com/google/glog.git && git clone -b master https://github.com/zeux/pugixml.git
-WORKDIR /lab/glog/cmake-build
-RUN cmake -DCMAKE_BUILD_TYPE=Release .. && make && make install
+RUN git clone -b master https://github.com/zeux/pugixml.git
 WORKDIR /lab/pugixml/cmake-build
-RUN cmake -DCMAKE_BUILD_TYPE=Release .. && make && make install
+RUN cmake -DCMAKE_BUILD_TYPE=Release .. && make install
 
 # project
 WORKDIR ${LAMBDA_TASK_ROOT}
@@ -29,3 +21,4 @@ RUN yarn install --check-files && rm -rf /lab
 
 # app-server
 ENTRYPOINT [ "node", "index.js" ]
+# ENTRYPOINT [ "tail", "-f", "/dev/null" ]
