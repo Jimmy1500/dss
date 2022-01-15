@@ -24,13 +24,13 @@ provider:
 
 functions:
   health:
-    handler: sls/Repo.health
+    handler: sls/Lambda.health
     events:
       - http:
           method: get
           path: /health
           cors: true
-          timeout: 20
+          timeout: 30
           request:
             parameters:
               querystrings:
@@ -38,24 +38,24 @@ functions:
           response:
             headers:
               Content-Type: "'application/json'"
-  repo_info:
-    handler: src/Repo.get_info
+  repo:
+    handler: src/Lambda.repo
     events:
       - http:
           method: post
-          path: /get_info
+          path: /repo
           cors: true
           response:
             headers:
               Content-Type: "'application/json'"
   webhook:
-    handler: sls/Repo.webhook
+    handler: sls/Lambda.webhook
     events:
       - http:
           method: post
           path: /webhook
           cors: true
-          timeout: 20
+          timeout: 30
           request:
             parameters:
               querystrings:
