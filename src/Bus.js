@@ -67,7 +67,7 @@ class Bus {
         }
     }
 
-    async pull(topic, last_id, fn = async (topic, event) => { console.warn("not processed: topic: %O, event: %O", topic, event); return false }, count = 10, block = 0) {
+    async pull(topic, last_id, block = 0, count = 10, fn = async (topic, event) => { console.warn("not processed: topic: %O, event: %O", topic, event); return false }) {
         if ( count <= 0 ) { count = 10; } 
 
         let streams;
