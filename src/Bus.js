@@ -3,13 +3,19 @@ const Redis = require('ioredis');
 
 // array -> object
 function encode(array, object) {
-    if ( array.length % 2 || !object ) { throw new Error("cannot encode array -> object, expected: array.length % 2 == 0 && object"); }
+    if ( array?.length % 2 || !object ) { throw new Error("cannot encode array -> object, expected: array.length % 2 == 0 && object"); }
     for (let i = 0; i < array.length; i += 2) {
         const key = array[i];
         const val = array[i+1];
         object[key] = val;
     }
+    return object;
 }     
+
+// object -> array
+function decode(object) {
+    return Object.entries(object).reduce((array, entry) => [...array, ...entry], [])
+}
 
 /* 
     events: [                           ->  objects: [
@@ -18,13 +24,7 @@ function encode(array, object) {
         ...                             ->      ...
     ]                                   ->  ]
 */
-function parse(events) {
-    return events.map( ([id, data]) => {
-        const object = { id: id }
-        encode(data, object)
-        return object;
-    });
-}
+function parse(events) { return events.map( ([id, data]) => { return encode(data, { id: id }); }); }
 
 class Bus {
     constructor() {
@@ -44,11 +44,9 @@ class Bus {
         Redis.Command.setReplyTransformer("hgetall", (replies) => {
             if ( !replies?.length ) { return null; }
             if ( !Array.isArray(replies) ) { replies = [replies]; }
-            return this.encode(replies);
+            return encode(replies, {});
         });
     }
-
-    encode(array) { const object = {}; encode(array, object); return object; }
 
     /* --------------- primary interface --------------- */
 
@@ -101,7 +99,7 @@ class Bus {
                         }
                     } catch( e ) {
                         failed = true;
-                        console.error("event %O failed, critical error", e)
+                        console.error("event %O failed, critical error", e);
                     }
                 } // for ( const event of events )
             }
@@ -110,21 +108,33 @@ class Bus {
     }
 
     /* cache */
-    async set(key, val) {
-        if ( typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean' ) {
-            return await this.redis_.set(key, val);
-        } else if ( val instanceof Object || Array.isArray(val) ) {
-            return await this.redis_.set(key, JSON.stringify(val));
+    async set(key, val, literal = true) {
+        if ( literal ) {
+            if ( val instanceof Object || Array.isArray(val) ) { return await this.redis_.set(key, JSON.stringify(val)); }
+            if ( typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean' ) { return await this.redis_.set(key, val); }
+        } else {
+            if ( Array.isArray(val) && !(val.length % 2)) { return await this.redis_.hset(key, ...val); }
+            if (val instanceof Object) { return await this.redis_.hset(key, ...decode(val)); }
+            if ( typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean' ) { throw new TypeError(`invalid cache type invalid ${val}: ${typeof val}, use set(key,val,literal=true) instead`); }
         }
         throw new TypeError(`invalid cache type ${val}: ${typeof val}`)
     }
-    async get(key) {
-        return new Promise((resolve, reject) => {
-            this.redis_.get(key, (err, val) => {
-                if (err) { reject(err); }
-                else { resolve(val); }
+    async get(key, literal = true) {
+        if ( literal ) {
+            return new Promise((resolve, reject) => {
+                this.redis_.get(key, (err, val) => {
+                    if (err) { reject(err); }
+                    else { resolve(val); }
+                });
             });
-        });
+        } else {
+            return new Promise((resolve, reject) => {
+                this.redis_.hgetall(key, (err, val) => {
+                    if (err) { reject(err); }
+                    else { resolve(val); }
+                });
+            });
+        }
     }
 
     /* clean */
