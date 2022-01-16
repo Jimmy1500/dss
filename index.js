@@ -1,12 +1,12 @@
 const { App, Cluster, Config } = require('./src');
 const { default: axios } = require('axios');
 
-const { Bus } = require('./src/Bus');
-const bus = new Bus();
-bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ });
+// const { Bus } = require('./src/Bus');
+// const bus = new Bus();
+// bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ });
 
-bus.push(Config.REDIS.TOPIC.M3_USER, { user: 'octocat' });
-bus.push(Config.REDIS.TOPIC.M3_REPO, { user: 'octocat' });
+// bus.push(Config.REDIS.TOPIC.M3_USER, { user: 'octocat' });
+// bus.push(Config.REDIS.TOPIC.M3_REPO, { user: 'octocat' });
 // bus.poll([...Object.values(Config.REDIS.TOPIC)], [ 0, 0 ], 10, 0).then(s  => { console.log('streams: %O', s); bus.flush(); });
 
 // bus.set('test_cache', ['a', 'b', 'c'], false).then(
@@ -62,7 +62,7 @@ function run(duration = 10000) {
         new App(cluster.network(), Config.REDIS.TOPIC.M3_REPO, 0, Config.POLL_SIZE, Config.BLOCK_ON_EMPTY, Config.CACHE.REPO_EXPIRY, handler)
     ]); 
 
-    console.log('running cluster, shutdown in approx...%O', duration ? `${duration/1000} s`: 'never');
+    console.log('running cluster, shutdown in approx...%Os', duration ? duration/1000: 'N/A');
 
     cluster.run();
     if ( duration ) { cluster.wait(duration).then( _ => cluster.shutdown()); }

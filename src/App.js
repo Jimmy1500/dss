@@ -65,17 +65,19 @@ class App {
                 await this.bus_.del(key);
                 console.warn(`cache %O deleted, no data or expiry`, key);
             } else if ( cached?.expiry > Date.now() ) {
-                console.warn(`cache %O recovered per %O.%O: %O`, key, topic, event?.id, event?.body);
+                console.warn(`cache %O recovered per %O.%O, expire in %Os`, key, topic, event?.id, (cached.expiry - Date.now())/1000);
                 return cached?.data;
-            } else { console.warn(`cache %O expired, retrieving data...`, key); }
+            } else {
+                console.warn(`cache %O expired, retrieving data...`, key);
+            }
         } else {
-            console.warn(`no cache exists per %O.%O: %O, retrieving data...`, topic, event?.id, event?.body);
+            console.warn(`no cache exists per %O.%O, retrieving data...`, topic, event?.id);
         }
 
         const data = this.handler_.constructor.name == 'AsyncFunction' ? await this.handler_(topic, event) : this.handler_(topic, event);
         if ( data ) {
             await this.bus_.set(key, { data: data, expiry: Date.now() + this.expiry_ });
-            console.error(`data retrieved per %O.%O: %O, cache %O updated`, topic, event?.id, event?.body, key);
+            console.error(`data retrieved per %O.%O, cache %O updated, expire in %Os`, topic, event?.id, key, this.expiry_/1000);
         }
         return data;
     }
