@@ -47,10 +47,10 @@ class Cluster {
     }
 
     async start() {
-        if ( this.bus_ ) { this.bus_.connect({ port: REDIS.PORT, host: REDIS.HOST, db: 0, /* username: , password: */ }); }
         switch(this.state_) {
             case CLUSTER_STATUS.DEPLOYED:
             case CLUSTER_STATUS.STOPPED:
+                if ( this.bus_ ) { this.bus_.connect({ port: REDIS.PORT, host: REDIS.HOST, db: 0, /* username: , password: */ }); }
                 for ( const app of this.apps_ ) { await app.start(); }
                 this.report(CLUSTER_STATUS.STARTED);
                 break;
@@ -64,11 +64,11 @@ class Cluster {
             case CLUSTER_STATUS.STARTED:
             case CLUSTER_STATUS.SHUTDOWN:
                 for ( const app of this.apps_ ) { await app.stop(); }
+                if ( this.bus_ ) { this.bus_.disconnect(); }
                 this.report(CLUSTER_STATUS.STOPPED);
                 break;
             default: throw new EvalError(`cannot stop cluster, invalid cluster state: ${this.state_}`);
         }
-        if ( this.bus_ ) { this.bus_.disconnect(); }
         console.log(`cluster stopped`);
     }
 

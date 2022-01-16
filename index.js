@@ -8,7 +8,7 @@ function run(duration = 10000) {
         new App(cluster.network(), Config.REDIS.TOPIC.M3_USER, 0, 10, 1000),
         new App(cluster.network(), Config.REDIS.TOPIC.M3_REPO, 0, 10, 1000)
     ]); 
-    cluster.run()
+    cluster.run();
     cluster.network().sleep(duration).then( _ => cluster.shutdown());
 }
 

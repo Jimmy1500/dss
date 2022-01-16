@@ -59,7 +59,7 @@ class App {
                 break;
             default: break;
         }
-        console.log('app %O stopped', this.id_);
+        console.log('app %O stopped, last event id: %O', this.id_, this.last_id_);
     }
     async work() {
         console.log('app %O working...', this.id_);
