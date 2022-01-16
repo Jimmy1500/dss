@@ -41,7 +41,7 @@ class Cluster {
                     for ( const app of apps ) {
                         if ( app instanceof App ) {
                             this.apps_.push(app);
-                            console.log('app %O deployed', app.id())
+                            console.log('app %O deployed', app.id());
                         } else {
                             console.warn(`cannot deploy app to cluster, invalid type ${typeof app}`);
                         }
