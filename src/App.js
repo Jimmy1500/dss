@@ -25,11 +25,11 @@ class App {
 
         if ( bus ) {
             if ( bus instanceof Bus ) {
-                this.bus_       = bus;
+                this.bus_           = bus;
                 this.network_type_  = NETWORK_TYPE.SHARED;
             } else { throw new TypeError('bus must be instance of Bus'); }
         } else {
-            this.bus_       = new Bus();
+            this.bus_           = new Bus();
             this.network_type_  = NETWORK_TYPE.PRIVATE;
         }
         
