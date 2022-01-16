@@ -1,12 +1,12 @@
 const { App, Cluster, Config } = require('./src');
 const { default: axios } = require('axios');
 
-// const { Bus } = require('./src/Bus');
-// const bus = new Bus();
-// bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ });
+const { Bus } = require('./src/Bus');
+const bus = new Bus();
+bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ });
 
-// bus.push(Config.REDIS.TOPIC.M3_USER, { user: 'octocat' });
-// bus.push(Config.REDIS.TOPIC.M3_REPO, { user: 'octocat' });
+bus.push(Config.REDIS.TOPIC.M3_USER, { user: 'octocat' });
+bus.push(Config.REDIS.TOPIC.M3_REPO, { user: 'octocat' });
 // bus.poll([...Object.values(Config.REDIS.TOPIC)], [ 0, 0 ], 10, 0).then(s  => { console.log('streams: %O', s); bus.flush(); });
 
 // bus.set('test_cache', ['a', 'b', 'c'], false).then(
@@ -20,8 +20,6 @@ const { default: axios } = require('axios');
 
 async function handler(topic, event) {
     try {
-        console.log('processing event %O.%O: %O', topic, event?.id, event?.body);
-
         const user = JSON.parse(event?.body)?.user;
         if ( !user?.length ) { throw new EvalError('no user specified in event.body'); }
 
@@ -60,8 +58,8 @@ function run(duration = 10000) {
 
     const cluster = new Cluster(Config.NETWORK_TYPE.SHARED, Config.IDLE_STRATEGY);
     cluster.deploy([
-        new App(cluster.network(), Config.REDIS.TOPIC.M3_USER, 0, Config.POLL_SIZE, Config.BLOCK_ON_EMPTY, handler),
-        new App(cluster.network(), Config.REDIS.TOPIC.M3_REPO, 0, Config.POLL_SIZE, Config.BLOCK_ON_EMPTY, handler)
+        new App(cluster.network(), Config.REDIS.TOPIC.M3_USER, 0, Config.POLL_SIZE, Config.BLOCK_ON_EMPTY, Config.CACHE.USER_EXPIRY, handler),
+        new App(cluster.network(), Config.REDIS.TOPIC.M3_REPO, 0, Config.POLL_SIZE, Config.BLOCK_ON_EMPTY, Config.CACHE.REPO_EXPIRY, handler)
     ]); 
 
     console.log('running cluster, shutdown in approx...%O', duration ? `${duration/1000} s`: 'never');

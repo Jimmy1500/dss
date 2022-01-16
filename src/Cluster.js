@@ -1,7 +1,7 @@
 'use strict'
 const { Bus } = require('./Bus')
 const { App, NETWORK_TYPE } = require('./App');
-const { REDIS } = require('./Const')
+const { REDIS } = require('./Env')
 
 const CLUSTER_STATUS =  {
     IDLE:               'IDLE',

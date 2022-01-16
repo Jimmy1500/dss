@@ -1,7 +1,7 @@
 const { Bus } = require('./Bus');
 const { App, NETWORK_TYPE } = require('./App');
 const { Cluster, CLUSTER_STATUS } = require('./Cluster');
-const { ENV, REDIS, AWS, GIT } = require('./Const');
+const { LOCALE, REDIS, AWS, GIT } = require('./Env');
 
 const Config = {
     NETWORK_TYPE,
@@ -9,7 +9,11 @@ const Config = {
     IDLE_STRATEGY:  0,
     POLL_SIZE:      50,
     BLOCK_ON_EMPTY: 1000,
-    ENV,
+    CACHE: {
+        USER_EXPIRY: 30000,   
+        REPO_EXPIRY: 20000,
+    },
+    LOCALE,
     REDIS,
     AWS,
     GIT

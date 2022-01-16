@@ -1,8 +1,6 @@
 'use strict'
 
-const ENV = {
-    NODE:                process.env.NODE_ENV             || 'LOCAL',
-}
+const LOCALE = process.env.NODE_ENV || 'LOCAL';
 
 const REDIS = { 
     HOST:   process.env.REDIS_HOST || 'localhost',
@@ -30,7 +28,7 @@ const GIT = {
 }
 
 module.exports = {
-    ENV,
+    LOCALE,
     REDIS,
     AWS,
     GIT,
