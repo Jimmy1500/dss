@@ -7,7 +7,7 @@ const { default: axios } = require('axios');
 
 // bus.push(Config.REDIS.TOPIC.M3_USER, { user: 'octocat' });
 // bus.push(Config.REDIS.TOPIC.M3_REPO, { user: 'octocat' });
-// bus.pull([...Object.values(Config.REDIS.TOPIC)], [ 0, 0 ], 10, 0).then(s  => { console.log('streams: %O', s); bus.flush(); });
+// bus.poll([...Object.values(Config.REDIS.TOPIC)], [ 0, 0 ], 10, 0).then(s  => { console.log('streams: %O', s); bus.flush(); });
 
 // bus.set('test_cache', ['a', 'b', 'c'], false).then(
 //     bus.get('test_cache', false).then( val => {
