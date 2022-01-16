@@ -43,6 +43,7 @@ class Cluster {
                 break;
             default: throw new EvalError(`cannot deploy app to cluster, invalid cluster state: ${this.state_}`);
         }
+        console.log(`cluster deployed`);
     }
 
     async start() {
@@ -55,6 +56,7 @@ class Cluster {
                 break;
             default: throw new EvalError(`cannot start cluster, invalid cluster state: ${this.state_}`);
         }
+        console.log(`cluster started`);
     }
 
     async stop() {
@@ -67,6 +69,7 @@ class Cluster {
             default: throw new EvalError(`cannot stop cluster, invalid cluster state: ${this.state_}`);
         }
         if ( this.bus_ ) { this.bus_.disconnect(); }
+        console.log(`cluster stopped`);
     }
 
 
@@ -90,7 +93,6 @@ class Cluster {
                         await this.stop();
                         break;
                     case CLUSTER_STATUS.STOPPED:
-                        console.log(`cluster stopped`);
                         running = false;
                         break;
                     default: 

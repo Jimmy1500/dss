@@ -1,4 +1,5 @@
 'use strict'
+const uuid = require('uuid');
 const { Bus } = require('./Bus')
 const { ENV, REDIS, AWS, GIT } = require('./Const')
 
@@ -37,6 +38,7 @@ class App {
         this.count_     = count;
         this.block_     = block;
         this.handler_   = handler;
+        this.id_        = uuid.v4();
         console.log('app instantiated on %O, network type: %O', topic, this.network_type_);
     }
 
@@ -48,6 +50,7 @@ class App {
                 break;
             default: break;
         }
+        console.log('app %O started', this.id_);
     }
     async stop() {
         switch (this.network_type_) {
@@ -56,8 +59,10 @@ class App {
                 break;
             default: break;
         }
+        console.log('app %O stopped', this.id_);
     }
     async work() {
+        console.log('app %O working...', this.id_);
         this.last_id_ = await this.bus_.pull(this.topic_, this.last_id_, this.count_, this.block_, this.handler_);
     }
 }
