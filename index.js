@@ -27,20 +27,20 @@ async function handler(topic, event) {
 
         switch (topic) {
             case Config.REDIS.TOPIC.M3_USER: {
-                const info = await axios.get(`${Config.GIT.API_BASE_URL}/${user}`);
-                switch ( info?.status ) {
-                    case 200: return info?.data;
+                const res = await axios.get(`${Config.GIT.API_BASE_URL}/${user}`);
+                switch ( res?.status ) {
+                    case 200: return res?.data;
                     default:
-                        console.error(`[${info?.status}] no user data retrieved per user ${user}`);
+                        console.error(`[${res?.status}] no user data retrieved per user ${user}`);
                         return false;
                 }
             }
             case Config.REDIS.TOPIC.M3_REPO: {
-                const info = await axios.get(`${Config.GIT.API_BASE_URL}/${user}/repos`);
-                switch ( info?.status ) {
-                    case 200: return info?.data;
+                const res = await axios.get(`${Config.GIT.API_BASE_URL}/${user}/repos`);
+                switch ( res?.status ) {
+                    case 200: return res?.data;
                     default:
-                        console.error(`[${info?.status}] no repo data retrieved per user ${user}`);
+                        console.error(`[${res?.status}] no repo data retrieved per user ${user}`);
                         return false;
                 }
             }
