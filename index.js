@@ -9,7 +9,7 @@ function run(duration = 10000) {
         new App(cluster.network(), Config.REDIS.TOPIC.M3_REPO, 0, 10, 1000)
     ]); 
 
-    console.log('running cluster, shutdown in approx...%O', duration ? `${duration} ms`: 'never')
+    console.log('running cluster, shutdown in approx...%O', duration ? `${duration} ms`: 'never');
 
     cluster.run();
     if ( duration ) { cluster.wait(duration).then( _ => cluster.shutdown()); }
