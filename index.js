@@ -5,8 +5,8 @@ function run(duration = 10000) {
 
     const cluster = new Cluster(Config.NETWORK_TYPE.SHARED, Config.IDLE_STRATEGY);
     cluster.deploy([
-        new App(cluster.network(), Config.REDIS.TOPIC.M3_USER, 0, 10, 1000),
-        new App(cluster.network(), Config.REDIS.TOPIC.M3_REPO, 0, 10, 1000)
+        new App(cluster.network(), Config.REDIS.TOPIC.M3_USER, 0, 50, 1000),
+        new App(cluster.network(), Config.REDIS.TOPIC.M3_REPO, 0, 50, 1000)
     ]); 
 
     console.log('running cluster, shutdown in approx...%O', duration ? `${duration} ms`: 'never');
