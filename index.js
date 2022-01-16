@@ -20,7 +20,7 @@ const { default: axios } = require('axios');
 
 async function handler(topic, event) {
     try {
-        console.log('processing %O.%O: %O', topic, event?.id, event?.body);
+        console.log('processing event %O.%O: %O', topic, event?.id, event?.body);
 
         const user = JSON.parse(event?.body)?.user;
         if ( !user?.length ) { throw new EvalError('no user specified in event.body'); }
