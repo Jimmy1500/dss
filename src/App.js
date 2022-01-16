@@ -83,7 +83,7 @@ class App {
                         if ( data ) {
                             const key = hash.sha1({ topic: topic, body: event?.body })
                             await this.bus_.set(key, data);
-                            console.log('data retrieved, cache %O refreshed', key);
+                            console.log(`%O.%O processed, cache %O refreshed`, topic, event?.id, key);
                             await this.bus_.free(topic, event.id);
                         } else { failed = true; }
 
