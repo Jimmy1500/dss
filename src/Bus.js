@@ -53,6 +53,7 @@ class Bus {
     connect(options) { this.redis_ = new Redis(options); }
     disconnect()     { this.redis_.disconnect(); }
 
+    /* messaging */
     async push(topic, event, event_id = null) {
         const id = event_id || '*';
         if ( !event ) { throw new EvalError("cannot push empty event"); }
