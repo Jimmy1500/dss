@@ -113,7 +113,7 @@ class App {
                         console.log('processing event %O.%O: %O', topic, event?.id, event?.body);
                         if ( await this.dataOf(topic, event) ) { await this.bus_.free(topic, event.id); }
                         else {
-                            console.error(`no data retrieved per %O.%O: %O`, topic, event?.id, event?.body);
+                            console.error(`no data retrieved per %O.%O`, topic, event?.id);
                             failed = true;
                         }
 
