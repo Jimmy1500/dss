@@ -67,6 +67,7 @@ class Cluster {
     }
 
     async stop() {
+        console.log(`cluster shutting down...`);
         switch(this.state_) {
             case CLUSTER_STATUS.STARTED:
             case CLUSTER_STATUS.SHUTDOWN:
@@ -96,7 +97,6 @@ class Cluster {
                         await this.work();
                         break;
                     case CLUSTER_STATUS.SHUTDOWN:
-                        console.log(`cluster shutting down...`);
                         await this.stop();
                         break;
                     case CLUSTER_STATUS.STOPPED:
