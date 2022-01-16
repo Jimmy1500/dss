@@ -68,4 +68,4 @@ function run(duration = 10000) {
     if ( duration ) { cluster.wait(duration).then( _ => cluster.shutdown()); }
 }
 
-run();
+run(0);
