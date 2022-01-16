@@ -77,7 +77,7 @@ class App {
         const data = this.handler_.constructor.name == 'AsyncFunction' ? await this.handler_(topic, event) : this.handler_(topic, event);
         if ( data ) {
             await this.bus_.set(key, { data: data, expiry: Date.now() + this.expiry_ });
-            console.error(`data retrieved per %O.%O, cache %O updated, expire in %Os`, topic, event?.id, key, this.expiry_/1000);
+            console.log(`data retrieved per %O.%O, cache %O updated, expire in %Os`, topic, event?.id, key, this.expiry_/1000);
         }
         return data;
     }
