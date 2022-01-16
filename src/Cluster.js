@@ -60,6 +60,7 @@ class Cluster {
     async stop() {
         switch(this.state_) {
             case CLUSTER_STATUS.STARTED:
+            case CLUSTER_STATUS.SHUTDOWN:
                 for ( const app of this.apps_ ) { await app.stop(); }
                 this.report(CLUSTER_STATUS.STOPPED);
                 break;
@@ -74,6 +75,7 @@ class Cluster {
     }
 
     async run() {
+        let running = true;
         do {
             try {
                 switch(this.state_) {
@@ -84,15 +86,22 @@ class Cluster {
                         await this.work();
                         break;
                     case CLUSTER_STATUS.SHUTDOWN:
+                        console.log(`cluster shutting down...`);
                         await this.stop();
                         break;
-                    default: throw new EvalError(`cannot run cluster, invalid cluster state: ${this.state_}`);
+                    case CLUSTER_STATUS.STOPPED:
+                        console.log(`cluster stopped`);
+                        running = false;
+                        break;
+                    default: 
+                        throw new EvalError(`cannot run cluster, invalid cluster state: ${this.state_}`);
                 }
             } catch ( e )  {
                 console.log(e.stack);
+                running = false;
                 break;
             }
-        } while (true);
+        } while (running);
     }
 }
 

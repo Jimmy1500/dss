@@ -1,12 +1,18 @@
 const { App, Cluster, Config } = require('./src')
 
-async function run() {
+async function run(duration = 15000) {
+    if ( duration <= 0 ) { throw new EvalError('duration must be > 0'); }
+
     const cluster = new Cluster(Config.NETWORK_TYPE.SHARED);
     cluster.deploy([
         new App(cluster.network(), Config.REDIS.TOPIC.M3_USER, 0, 10, 1000),
         new App(cluster.network(), Config.REDIS.TOPIC.M3_REPO, 0, 10, 1000)
     ]); 
-    await cluster.run()
+
+    cluster.run()
+
+    await cluster.network().sleep(duration);
+    cluster.shutdown();
 }
 
 run();
