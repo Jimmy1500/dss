@@ -66,9 +66,8 @@ class Bus {
         }
     }
 
-    async poll(topic, last_id, count = 10, block = 0) {
-        if ( count <= 0 ) { count = 10; } 
-
+    async poll(topic, last_id, count = 50, block = 0) {
+        if ( typeof count != 'number' || count <= 0 ) { throw new EvalError(`invalid count ${count}`); }
         if ( Array.isArray(topic) ) {
             if ( !Array.isArray(last_id) || topic.length != last_id.length ) {
                 throw new EvalError(`mis-aligned, topic ${topic} vs. last_id ${last_id}`);

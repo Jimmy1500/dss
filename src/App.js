@@ -15,7 +15,7 @@ class App {
         topic,
         last_id = 0,
         count   = 50,
-        block   = 10,
+        block   = 0,
         handler = (topic, event) => { console.warn("topic: %O, event: %O", topic, event); return false; }
     ) {
         if ( typeof topic   != 'string' && !Array.isArray(topic)   ) { throw new TypeError(`invalid topic type ${typeof topic}`);     }
@@ -87,6 +87,7 @@ class App {
                             await this.bus_.free(topic, event.id);
                         } else { failed = true; }
 
+                        // update last processed event_id if all succeeded
                         if ( !failed ) {
                             if ( Array.isArray(this.topic_) ) {
                                 const index = this.topic_.length > 1 ? this.topic_.findIndex(name => name == topic) : 0;
