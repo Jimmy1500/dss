@@ -38,6 +38,8 @@ class Cluster {
                     for ( const app of apps ) {
                         if ( app instanceof App ) { this.apps_.push(app); }
                     }
+                } else {
+                    throw new EvalError(`cannot deploy app(s) to cluster, invalid type: ${typeof apps}`);
                 }
                 this.report(CLUSTER_STATUS.DEPLOYED);
                 break;
