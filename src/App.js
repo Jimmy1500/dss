@@ -54,7 +54,7 @@ class App {
 
     /* --------------- primary interface --------------- */
     id() { return this.id_; }
-    async pop(topic, event) {
+    async dataOf(topic, event) {
         if ( !(event instanceof Object)   ) { throw new TypeError("event must be object");      }
 
         const key   = hash.sha1({ topic: topic, body: event?.body });
@@ -111,8 +111,7 @@ class App {
                 for ( const event of events ) {
                     try {
                         console.log('processing event %O.%O: %O', topic, event?.id, event?.body);
-                        const data = await this.pop(topic, event);
-                        if ( data ) { await this.bus_.free(topic, event.id); }
+                        if ( await this.dataOf(topic, event) ) { await this.bus_.free(topic, event.id); }
                         else {
                             console.error(`no data retrieved per %O.%O: %O`, topic, event?.id, event?.body);
                             failed = true;
