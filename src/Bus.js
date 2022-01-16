@@ -27,8 +27,8 @@ function decode(object) {
 function parse(events) { return events.map( ([id, data]) => { return encode(data, { id: id }); }); }
 
 class Bus {
-    constructor() {
-        this.type = 'redis',
+    constructor(type = 'redis') {
+        this.type_ = type || 'redis',
         // enable array to json transformation for xread replies
         Redis.Command.setReplyTransformer('xread', (replies) => {
             if ( !replies?.length ) { return null; }
@@ -49,7 +49,6 @@ class Bus {
     }
 
     /* --------------- primary interface --------------- */
-
     // options?: IORedis.RedisOptions
     connect(options) { this.redis_ = new Redis(options); }
     disconnect()     { this.redis_.disconnect(); }
@@ -151,6 +150,8 @@ class Bus {
         await this.redis_.del(event_id);
     }
     async flush() { await this.redis_.flushall(); }
+
+    /* util */
     async wait(ms){ return new Promise((resolve) => { setTimeout(resolve, ms); }); }
 }; // class Bus
 
