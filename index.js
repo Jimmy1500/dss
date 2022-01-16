@@ -11,8 +11,9 @@ const { default: axios } = require('axios');
 
 // bus.set('test_cache', ['a', 'b', 'c'], false).then(
 //     bus.get('test_cache', false).then( val => {
-//         console.log(val);
+//         console.log('test_cache retrieved: %O', val);
 //         bus.del('test_cache');
+//         console.log('test_cache deleted: %O', val);
 //         bus.disconnect();
 //     })
 // );
@@ -59,11 +60,11 @@ function run(duration = 10000) {
 
     const cluster = new Cluster(Config.NETWORK_TYPE.SHARED, Config.IDLE_STRATEGY);
     cluster.deploy([
-        new App(cluster.network(), Config.REDIS.TOPIC.M3_USER, 0, 50, 100, handler),
-        new App(cluster.network(), Config.REDIS.TOPIC.M3_REPO, 0, 50, 100, handler)
+        new App(cluster.network(), Config.REDIS.TOPIC.M3_USER, 0, Config.POLL_SIZE, Config.BLOCK_ON_EMPTY, handler),
+        new App(cluster.network(), Config.REDIS.TOPIC.M3_REPO, 0, Config.POLL_SIZE, Config.BLOCK_ON_EMPTY, handler)
     ]); 
 
-    console.log('running cluster, shutdown in approx...%O', duration ? `${duration} ms`: 'never');
+    console.log('running cluster, shutdown in approx...%O', duration ? `${duration/1000} s`: 'never');
 
     cluster.run();
     if ( duration ) { cluster.wait(duration).then( _ => cluster.shutdown()); }

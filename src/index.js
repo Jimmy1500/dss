@@ -6,7 +6,9 @@ const { ENV, REDIS, AWS, GIT } = require('./Const');
 const Config = {
     NETWORK_TYPE,
     CLUSTER_STATUS,
-    IDLE_STRATEGY: 0,
+    IDLE_STRATEGY:  0,
+    POLL_SIZE:      50,
+    BLOCK_ON_EMPTY: 1000,
     ENV,
     REDIS,
     AWS,

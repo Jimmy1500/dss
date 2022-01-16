@@ -66,22 +66,19 @@ class Bus {
         }
     }
 
-    async pull(topic, last_id, count = 10, block = 0) {
+    async poll(topic, last_id, count = 10, block = 0) {
         if ( count <= 0 ) { count = 10; } 
 
-        let last = last_id;
         if ( Array.isArray(topic) ) {
-            if ( !Array.isArray(last_id) || topic.length != last_id.length ) { last = Array(topic.length).fill(0); }
-            return {
-                last_id: last,
-                streams: await this.redis_.xread("count", count, "block", block, "STREAMS", ...topic, ...last)
-            };
-        } else {
-            if ( Array.isArray(last_id) ) { last = 0; }
-            return {
-                last_id: last,
-                streams: await this.redis_.xread("count", count, "block", block, "STREAMS", topic, last)
+            if ( !Array.isArray(last_id) || topic.length != last_id.length ) {
+                throw new EvalError(`mis-aligned, topic ${topic} vs. last_id ${last_id}`);
             }
+            return await this.redis_.xread("count", count, "block", block, "STREAMS", ...topic, ...last_id);
+        } else {
+            if ( Array.isArray(last_id) ) {
+                throw new EvalError(`mis-aligned, topic ${topic} vs. last_id ${last_id}`);
+            }
+            return await this.redis_.xread("count", count, "block", block, "STREAMS", topic, last_id);
         }
     }
 
