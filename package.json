@@ -21,6 +21,7 @@
     "serverless-offline": "^8.3.1"
   },
   "dependencies": {
+    "axios": "^0.24.0",
     "ioredis": "^4.28.3",
     "object-hash": "^2.2.0",
     "uuid": "^8.3.2"
