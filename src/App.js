@@ -1,6 +1,11 @@
 'use strict'
-const { BUS_TYPE, Bus } = require('./Bus')
-const { ENV, REDIS, AWS, GIT } = require('./Config')
+const { Bus } = require('./Bus')
+const { ENV, REDIS, AWS, GIT } = require('./Const')
+
+const NETWORK_TYPE = {
+    SHARED:  'SHARED',
+    PRIVATE: 'PRIVATE'
+}
 
 class App {
     constructor(
@@ -20,11 +25,11 @@ class App {
         if ( bus ) {
             if ( bus instanceof Bus ) {
                 this.bus_       = bus;
-                this.bus_type_  = BUS_TYPE.SHARED;
+                this.network_type_  = NETWORK_TYPE.SHARED;
             } else { throw new TypeError('bus must be instance of Bus'); }
         } else {
             this.bus_       = new Bus();
-            this.bus_type_  = BUS_TYPE.PRIVATE;
+            this.network_type_  = NETWORK_TYPE.PRIVATE;
         }
         
         this.topic_     = topic;
@@ -32,21 +37,21 @@ class App {
         this.count_     = count;
         this.block_     = block;
         this.handler_   = handler;
-        console.log('app instantiated on %O, network type: %O', topic, this.bus_type_);
+        console.log('app instantiated on %O, network type: %O', topic, this.network_type_);
     }
 
     /* --------------- primary interface --------------- */
     async start() {
-        switch (this.bus_type_) {
-            case BUS_TYPE.PRIVATE:
+        switch (this.network_type_) {
+            case NETWORK_TYPE.PRIVATE:
                 this.bus_.connect({ port: REDIS.PORT, host: REDIS.HOST, db: 0, /* username: , password: */ });
                 break;
             default: break;
         }
     }
     async stop() {
-        switch (this.bus_type_) {
-            case BUS_TYPE.PRIVATE:
+        switch (this.network_type_) {
+            case NETWORK_TYPE.PRIVATE:
                 this.bus_.disconnect();
                 break;
             default: break;
@@ -58,6 +63,6 @@ class App {
 }
 
 module.exports = {
-    BUS_TYPE,
+    NETWORK_TYPE,
     App
 }

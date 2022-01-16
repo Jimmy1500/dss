@@ -1,13 +1,10 @@
-const { App } = require('./src/App')
-const { Cluster } = require('./src/Cluster')
-const { ENV, REDIS, AWS, GIT } = require('./src/Config')
-
+const { App, Cluster, Config } = require('./src')
 
 async function run() {
-    const cluster = new Cluster();
+    const cluster = new Cluster(Config.NETWORK_TYPE.SHARED);
     cluster.deploy([
-        new App(cluster.network(), REDIS.TOPIC.M3_USER, 0, 10, 1000),
-        new App(cluster.network(), REDIS.TOPIC.M3_REPO, 0, 10, 1000)
+        new App(cluster.network(), Config.REDIS.TOPIC.M3_USER, 0, 10, 1000),
+        new App(cluster.network(), Config.REDIS.TOPIC.M3_REPO, 0, 10, 1000)
     ]); 
     await cluster.run()
 }

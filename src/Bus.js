@@ -1,11 +1,6 @@
 'use strict'
 const Redis = require('ioredis');
 
-const BUS_TYPE = {
-    SHARED:  'SHARED',
-    PRIVATE: 'PRIVATE'
-}
-
 // array -> object
 function encode(array, object) {
     if ( array?.length % 2 || !object ) { throw new Error("cannot encode array -> object, expected: array.length % 2 == 0 && object"); }
@@ -159,6 +154,5 @@ class Bus {
 }; // class Bus
 
 module.exports = {
-    BUS_TYPE,
     Bus: Bus
 }

@@ -28,8 +28,6 @@ const GIT = {
     ACCESS_TOKEN:       process.env.GIT_ACCESS_TOKEN      || 'FAKE',
 }
 
-
-
 module.exports = {
     ENV,
     REDIS,

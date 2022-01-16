@@ -1,6 +1,7 @@
 'use strict'
-const { BUS_TYPE, Bus } = require("./Bus");
-const { ENV, REDIS, AWS, GIT } = require('./Config')
+const { Bus } = require('./Bus')
+const { App, NETWORK_TYPE } = require('./App');
+const { ENV, REDIS, AWS, GIT } = require('./Const')
 
 const CLUSTER_STATUS =  {
     IDLE:               'IDLE',
@@ -11,9 +12,9 @@ const CLUSTER_STATUS =  {
 }
 
 class Cluster {
-    constructor(bus_type = BUS_TYPE.SHARED) {
-        switch( bus_type ) {
-            case BUS_TYPE.SHARED:
+    constructor(network_type = NETWORK_TYPE.SHARED) {
+        switch( network_type ) {
+            case NETWORK_TYPE.SHARED:
                 this.bus_ = new Bus();
                 break;
             default:
@@ -32,10 +33,11 @@ class Cluster {
     deploy(apps) {
         switch(this.state_) {
             case CLUSTER_STATUS.IDLE:
-                if ( Array.isArray(apps) ) {
-                    for ( const app of apps ) { this.apps_.push(app); }
-                } else {
-                    this.apps_.push(apps);
+                if ( apps instanceof App ) { this.apps_.push(apps); }
+                else if ( Array.isArray(apps) ) {
+                    for ( const app of apps ) {
+                        if ( app instanceof App ) { this.apps_.push(app); }
+                    }
                 }
                 this.report(CLUSTER_STATUS.DEPLOYED);
                 break;
@@ -96,5 +98,5 @@ class Cluster {
 
 module.exports = {
     CLUSTER_STATUS,
-    Cluster
+    Cluster,
 }
