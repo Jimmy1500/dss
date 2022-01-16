@@ -151,7 +151,7 @@ class Bus {
         await this.redis_.del(event_id);
     }
     async flush() { await this.redis_.flushall(); }
-    async wait(ms) { return new Promise((resolve) => { setTimeout(resolve, ms); }); }
+    async wait(ms){ return new Promise((resolve) => { setTimeout(resolve, ms); }); }
 }; // class Bus
 
 module.exports = {
