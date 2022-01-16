@@ -36,14 +36,19 @@ class Cluster {
                 if ( apps instanceof App ) { this.apps_.push(apps); }
                 else if ( Array.isArray(apps) ) {
                     for ( const app of apps ) {
-                        if ( app instanceof App ) { this.apps_.push(app); }
+                        if ( app instanceof App ) {
+                            this.apps_.push(app);
+                            console.log('app %O deployed', app.id())
+                        } else {
+                            console.warn(`cannot deploy app to cluster, invalid type ${typeof app}`);
+                        }
                     }
                 } else {
-                    throw new EvalError(`cannot deploy app(s) to cluster, invalid type: ${typeof apps}`);
+                    throw new EvalError(`cannot deploy app(s) to cluster, invalid type ${typeof apps}`);
                 }
                 this.report(CLUSTER_STATUS.DEPLOYED);
                 break;
-            default: throw new EvalError(`cannot deploy app to cluster, invalid cluster state: ${this.state_}`);
+            default: throw new EvalError(`cannot deploy app to cluster, invalid cluster state ${this.state_}`);
         }
         console.log(`cluster deployed`);
     }

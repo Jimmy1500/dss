@@ -39,10 +39,11 @@ class App {
         this.block_     = block;
         this.handler_   = handler;
         this.id_        = uuid.v4();
-        console.log('app instantiated on %O, network type: %O', topic, this.network_type_);
+        console.log('app %O intialized, topic: %O, network type: %O', this.id_, this.topic_, this.network_type_);
     }
 
     /* --------------- primary interface --------------- */
+    id() { return this.id_; }
     async start() {
         switch (this.network_type_) {
             case NETWORK_TYPE.PRIVATE:
@@ -62,7 +63,6 @@ class App {
         console.log('app %O stopped, last event id: %O', this.id_, this.last_id_);
     }
     async work() {
-        console.log('app %O working...', this.id_);
         this.last_id_ = await this.bus_.pull(this.topic_, this.last_id_, this.count_, this.block_, this.handler_);
     }
 }
