@@ -6,6 +6,7 @@ const REDIS = {
     HOST:   process.env.REDIS_HOST || 'localhost',
     PORT:   process.env.REDIS_PORT || '6379',
     TOPIC: {
+        M3_DATA: 'M3_DATA',
         M3_USER: 'M3_USER',
         M3_REPO: 'M3_REPO',
     },
