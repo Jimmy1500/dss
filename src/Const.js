@@ -26,6 +26,7 @@ const AWS = {
 
 const GIT = {
     ACCESS_TOKEN:       process.env.GIT_ACCESS_TOKEN      || 'FAKE',
+    API_BASE_URL:       process.env.GIT_API_BASE_URL      || 'https://api.github.com/users'
 }
 
 module.exports = {

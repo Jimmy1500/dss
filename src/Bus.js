@@ -66,52 +66,23 @@ class Bus {
         }
     }
 
-    async pull(
-        topic,
-        last_id,
-        count = 10,
-        block = 0,
-        fn = (topic, event) => { console.warn("topic: %O, event: %O", topic, event); return false; }
-    ) {
+    async pull(topic, last_id, count = 10, block = 0) {
         if ( count <= 0 ) { count = 10; } 
 
-        let streams;
+        let last = last_id;
         if ( Array.isArray(topic) ) {
-            if ( !Array.isArray(last_id) || topic.length != last_id.length ) { last_id = Array(topic.length).fill(0); }
-            streams = await this.redis_.xread("count", count, "block", block, "STREAMS", ...topic, ...last_id);
+            if ( !Array.isArray(last_id) || topic.length != last_id.length ) { last = Array(topic.length).fill(0); }
+            return {
+                last_id: last,
+                streams: await this.redis_.xread("count", count, "block", block, "STREAMS", ...topic, ...last)
+            };
         } else {
-            if ( Array.isArray(last_id) ) { last_id = 0; }
-            streams = await this.redis_.xread("count", count, "block", block, "STREAMS", topic, last_id);
-        }
-
-        // console.log(`consuming ${streams.length} topic(s)`)
-        if ( !Array.isArray(streams) ) { console.warn("topic %O drained", topic); }
-        else {
-            let failed = false;
-            for ( const [ topic_name, events ] of streams ) { // `topic_name` should equals to ${topic[i]}
-                // console.log("consuming topic: %O", topic_name)
-                for ( const event of events ) {
-                    try {
-                        const done = fn.constructor.name == 'AsyncFunction' ? await fn(topic_name, event) : fn(topic_name, event)
-                        if ( done ) { await this.free(topic_name, event.id); }
-                        else { failed = true; }
-
-                        if ( !failed ) {
-                            if ( Array.isArray(topic) ) {
-                                const topic_index = topic.length > 1 ? topic.findIndex(name => name == topic_name) : 0;
-                                last_id[topic_index] = event.id;
-                            } else {
-                                last_id = event.id;
-                            }
-                        }
-                    } catch( e ) {
-                        failed = true;
-                        console.error("event %O failed, critical error", e);
-                    }
-                } // for ( const event of events )
+            if ( Array.isArray(last_id) ) { last = 0; }
+            return {
+                last_id: last,
+                streams: await this.redis_.xread("count", count, "block", block, "STREAMS", topic, last)
             }
         }
-        return last_id;
     }
 
     /* cache */

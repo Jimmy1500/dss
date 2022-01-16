@@ -1,7 +1,8 @@
 'use strict'
 const uuid = require('uuid');
-const { Bus } = require('./Bus')
-const { ENV, REDIS, AWS, GIT } = require('./Const')
+const hash = require('object-hash');
+const { Bus } = require('./Bus');
+const { ENV, REDIS, AWS, GIT } = require('./Const');
 
 const NETWORK_TYPE = {
     SHARED:  'SHARED',
@@ -63,7 +64,39 @@ class App {
         console.log('app %O stopped, last event id: %O', this.id_, this.last_id_);
     }
     async work() {
-        this.last_id_ = await this.bus_.pull(this.topic_, this.last_id_, this.count_, this.block_, this.handler_);
+        const { last_id, streams } = await this.bus_.pull(this.topic_, this.last_id_, this.count_, this.block_);
+        this.last_id_ = last_id;
+
+        if ( !streams?.length ) { console.warn("topic %O drained", this.topic_); }
+        else {
+            let failed = false;
+
+            for ( const [ topic, events ] of streams ) { // `topic_name` should equal to ${topic[i]}
+                for ( const event of events ) {
+                    try {
+                        const data = this.handler_.constructor.name == 'AsyncFunction' ? await this.handler_(topic, event) : this.handler_(topic, event)
+                        if ( data ) {
+                            const key = hash.sha1({ topic: topic, body: event?.body })
+                            await this.bus_.set(key, data);
+                            console.log('data retrieved, cache %O refreshed', key);
+                            await this.bus_.free(topic, event.id);
+                        } else { failed = true; }
+
+                        if ( !failed ) {
+                            if ( Array.isArray(this.topic_) ) {
+                                const index = this.topic_.length > 1 ? this.topic_.findIndex(name => name == topic) : 0;
+                                this.last_id_[index] = event.id;
+                            } else {
+                                this.last_id_ = event.id;
+                            }
+                        }
+                    } catch( error ) {
+                        console.error("event %O failed, %O", event, error.stack);
+                        failed = true;
+                    }
+                } // for ( const event of events )
+            }
+        }
     }
 }
 
