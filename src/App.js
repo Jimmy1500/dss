@@ -39,7 +39,7 @@ class App {
         this.block_     = block;
         this.handler_   = handler;
         this.id_        = uuid.v4();
-        console.log('app %O intialized, topic: %O, network type: %O', this.id_, this.topic_, this.network_type_);
+        console.log('app %O created, topic: %O, network type: %O', this.id_, this.topic_, this.network_type_);
     }
 
     /* --------------- primary interface --------------- */

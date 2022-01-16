@@ -3,7 +3,7 @@ const { App, Cluster, Config } = require('./src')
 function run(duration = 10000) {
     if ( duration < 0 ) { throw new EvalError('duration cannot be < 0'); }
 
-    const cluster = new Cluster(Config.NETWORK_TYPE.SHARED);
+    const cluster = new Cluster(Config.NETWORK_TYPE.SHARED, Config.IDLE_STRATEGY);
     cluster.deploy([
         new App(cluster.network(), Config.REDIS.TOPIC.M3_USER, 0, 10, 1000),
         new App(cluster.network(), Config.REDIS.TOPIC.M3_REPO, 0, 10, 1000)
@@ -12,7 +12,7 @@ function run(duration = 10000) {
     console.log('running cluster, shutdown in approx...%O', duration ? `${duration} ms`: 'never')
 
     cluster.run();
-    if ( duration ) { cluster.network().sleep(duration).then( _ => cluster.shutdown()); }
+    if ( duration ) { cluster.wait(duration).then( _ => cluster.shutdown()); }
 }
 
 run();

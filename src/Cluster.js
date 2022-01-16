@@ -12,7 +12,9 @@ const CLUSTER_STATUS =  {
 }
 
 class Cluster {
-    constructor(network_type = NETWORK_TYPE.SHARED) {
+    constructor(network_type = NETWORK_TYPE.SHARED, idle_ms = 0) {
+        if ( typeof idle_ms != 'number' ) { throw new TypeError(`idle_ms must be number`); }
+
         switch( network_type ) {
             case NETWORK_TYPE.SHARED:
                 this.bus_ = new Bus();
@@ -21,16 +23,17 @@ class Cluster {
                 this.bus_ = null;
                 break;
         }
-        this.apps_ = [];
+        this.apps_  = [];
         this.state_ = CLUSTER_STATUS.IDLE;
+        this.idle_  = idle_ms > 0 ? idle_ms : 0;
+        console.log('cluster created, idle_strategy: %O ms', this.idle_);
     }
 
     /* --------------- primary interface --------------- */
     network()     { return this.bus_; }
     report(status){ this.state_ = status; }
     shutdown()    { this.report(CLUSTER_STATUS.SHUTDOWN); }
-
-    deploy(apps) {
+    deploy(apps)  {
         switch(this.state_) {
             case CLUSTER_STATUS.IDLE:
                 if ( apps instanceof App ) { this.apps_.push(apps); }
@@ -80,9 +83,11 @@ class Cluster {
         console.log(`cluster stopped`);
     }
 
-
     async work() {
-        for ( const app of this.apps_ ) { await app.work(); }
+        for ( const app of this.apps_ ) {
+            await app.work();
+            if ( this.idle_ ) { await this.wait(this.idle_); }
+        }
     }
 
     async run() {
@@ -112,6 +117,8 @@ class Cluster {
             }
         } while (running);
     }
+
+    async wait(ms) { return new Promise((resolve) => { setTimeout(resolve, ms); }); }
 }
 
 module.exports = {
