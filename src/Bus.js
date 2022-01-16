@@ -93,7 +93,9 @@ class Bus {
                 for ( const event of events ) {
                     try {
                         const done = fn.constructor.name == 'AsyncFunction' ? await fn(topic_name, event) : fn(topic_name, event)
-                        if ( !done ) { failed = true; }
+                        if ( done ) { await this.free(topic_name, event.id); }
+                        else { failed = true; }
+
                         if ( !failed ) {
                             if ( Array.isArray(topic) ) {
                                 const topic_index = topic.length > 1 ? topic.findIndex(name => name == topic_name) : 0;
@@ -101,7 +103,6 @@ class Bus {
                             } else {
                                 last_id = event.id;
                             }
-                            await this.free(topic_name, event.id);
                         }
                     } catch( e ) {
                         failed = true;
