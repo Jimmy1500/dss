@@ -1,6 +1,11 @@
 'use strict'
 const Redis = require('ioredis');
 
+const BUS_TYPE = {
+    SHARED:  'SHARED',
+    PRIVATE: 'PRIVATE'
+}
+
 // array -> object
 function encode(array, object) {
     if ( array?.length % 2 || !object ) { throw new Error("cannot encode array -> object, expected: array.length % 2 == 0 && object"); }
@@ -52,6 +57,7 @@ class Bus {
 
     // options?: IORedis.RedisOptions
     connect(options) { this.redis_ = new Redis(options); }
+    disconnect()     { this.redis_.disconnect(); }
 
     async push(topic, event, event_id = null) {
         const id = event_id || '*';
@@ -65,7 +71,13 @@ class Bus {
         }
     }
 
-    async pull(topic, last_id, block = 0, count = 10, fn = async (topic, event) => { console.warn("not processed: topic: %O, event: %O", topic, event); return false }) {
+    async pull(
+        topic,
+        last_id,
+        count = 10,
+        block = 0,
+        fn = (topic, event) => { console.warn("topic: %O, event: %O", topic, event); return false; }
+    ) {
         if ( count <= 0 ) { count = 10; } 
 
         let streams;
@@ -78,9 +90,8 @@ class Bus {
         }
 
         // console.log(`consuming ${streams.length} topic(s)`)
-        if ( !Array.isArray(streams) ) {
-            console.warn("topic %O drained", topic);
-        } else {
+        if ( !Array.isArray(streams) ) { console.warn("topic %O drained", topic); }
+        else {
             let failed = false;
             for ( const [ topic_name, events ] of streams ) { // `topic_name` should equals to ${topic[i]}
                 // console.log("consuming topic: %O", topic_name)
@@ -148,5 +159,6 @@ class Bus {
 }; // class Bus
 
 module.exports = {
+    BUS_TYPE,
     Bus: Bus
 }
