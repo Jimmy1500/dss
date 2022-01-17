@@ -1,5 +1,6 @@
 'use strict'
 const hash = require('object-hash');
+const { default: axios } = require('axios');
 
 async function cacheOf(bus, topic, event, expiry = 0, url = null) {
     const key   = hash.sha1({ topic: topic, body: event?.body });
@@ -52,6 +53,8 @@ async function merge(user, user_data, repo_data) {
 }
 
 module.exports = {
+    hash,
+    axios,
     cacheOf,
     merge,
 }

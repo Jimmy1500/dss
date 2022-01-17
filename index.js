@@ -1,6 +1,5 @@
 'use strict'
-const { lib, Bus, App, Cluster, Config } = require('./src');
-const { default: axios } = require('axios');
+const { cacheOf, merge, Bus, App, Cluster, Config } = require('./src');
 
 // const bus = new Bus();
 // bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ });
@@ -33,9 +32,9 @@ async function handler(bus, topic, event, expiry) {
             // get data from cache/source api
             let user_data, repo_data, data;
             try {
-                user_data = await lib.cacheOf(bus, Config.REDIS.TOPIC.M3_USER, event, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}`);
-                repo_data = await lib.cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, event, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}/repos`);
-                data      = await lib.merge  (user, user_data, repo_data);
+                user_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, event, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}`);
+                repo_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, event, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}/repos`);
+                data      = await merge  (user, user_data, repo_data);
             } catch ( error ) {
                 data      = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
             }
@@ -51,12 +50,12 @@ async function handler(bus, topic, event, expiry) {
             break;
         }
         case Config.REDIS.TOPIC.M3_USER: {
-            const data = await lib.cacheOf(bus, topic, event, expiry, `${Config.GIT.API_BASE_URL}/${user}`);
+            const data = await cacheOf(bus, topic, event, expiry, `${Config.GIT.API_BASE_URL}/${user}`);
             if ( !data ) { throw new EvalError(`${topic}.${event.id}: no data recovered for user '${user}'`); }
             break;
         }
         case Config.REDIS.TOPIC.M3_REPO: {
-            const data = await lib.cacheOf(bus, topic, event, expiry, `${Config.GIT.API_BASE_URL}/${user}/repos`);
+            const data = await cacheOf(bus, topic, event, expiry, `${Config.GIT.API_BASE_URL}/${user}/repos`);
             if ( !data ) { throw new EvalError(`${topic}.${event.id}: no data recovered for user '${user}'`); }
             break;
         }
