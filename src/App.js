@@ -2,10 +2,7 @@
 const uuid = require('uuid');
 const { Bus } = require('./Bus');
 const { REDIS } = require('./Env');
-
-function jsonOf(string) {
-    try { return JSON.parse(string); } catch (error) { return string; }
-}
+const { jsonOf } = require('./Core');
 
 const NETWORK_TYPE = {
     SHARED:  'SHARED',

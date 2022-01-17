@@ -1,5 +1,5 @@
 'use strict'
-const { axios, cacheOf, stash, merge, Bus, App, Cluster, Config } = require('./src');
+const { axios, jsonOf, cacheOf, stash, merge, Bus, App, Cluster, Config } = require('./src');
 
 // const bus = new Bus();
 // bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ });
@@ -21,7 +21,7 @@ async function handler(bus, topic, event, expiry) {
     if ( !(event instanceof Object) ) { throw new TypeError("event must be instance of object");}
     if ( !event?.body?.length       ) { throw new TypeError('no body specified in event');      }
 
-    const body = JSON.parse(event?.body);
+    const body = jsonOf(event?.body);
     let this_data = body?.error;
 
     if ( !this_data ) {

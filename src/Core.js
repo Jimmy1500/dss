@@ -2,6 +2,10 @@
 const hash = require('object-hash');
 const { default: axios } = require('axios');
 
+function jsonOf(string) {
+    try { return JSON.parse(string); } catch (error) { return string; }
+}
+
 function hashOf(topic, user) {
     if ( !topic?.length ) { throw new TypeError('no topic specified'); }
     if ( !user?.length ) { throw new TypeError('no user specified'); }
@@ -15,7 +19,7 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null
     const key = hashOf(topic, user);
     const val = await bus.get(key);
     if ( val ) {
-        const value = JSON.parse(val);
+        const value = jsonOf(val);
         if ( !value?.data || !value?.expiry ) {
             await bus.del(key);
             console.warn(`cache %O purged for %O, no data or expiry specified`, key, topic);
@@ -101,6 +105,7 @@ async function merge(user, user_data, repo_data) {
 module.exports = {
     hash,
     axios,
+    jsonOf,
     hashOf,
     cacheOf,
     stash,

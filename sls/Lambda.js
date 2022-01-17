@@ -1,5 +1,5 @@
 'use strict'
-const { cacheOf, stash, merge, Bus, Config } = require('../src');
+const { jsonOf, cacheOf, stash, merge, Bus, Config } = require('../src');
 
 const bus = new Bus();
 
@@ -14,7 +14,7 @@ async function health(event) {
 }
 
 async function getDataSync(event){
-  const body = JSON.parse(event.body);
+  const body = jsonOf(event.body);
   const user = body.user;
   const rate_url = `${Config.GIT.API_BASE_URL}/rate_limit`;
 
@@ -43,7 +43,7 @@ async function getDataSync(event){
 }
 
 async function getDataAsync(event){
-  const body = JSON.parse(event.body);
+  const body = jsonOf(event.body);
 
   bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ })
   await bus.push(Config.REDIS.TOPIC.M3_DATA, body);
@@ -59,7 +59,7 @@ async function getDataAsync(event){
 }
 
 async function callback(event){
-  const body = JSON.parse(event.body);
+  const body = jsonOf(event.body);
   return {
     statusCode: 200,
     body: JSON.stringify({
