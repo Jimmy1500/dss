@@ -83,7 +83,7 @@ class App {
                     let retry = Number(await this.bus_.get(retry_key) || 0);
 
                     try {
-                        console.log('# event %O.%O: %O', topic, event?.id, event?.body);
+                        console.log('# handling %O.%O: %O', topic, event?.id, event?.body);
                         switch ( this.handler_.constructor.name ) {
                             case 'AsyncFunction': await this.handler_(this.bus_, topic, event, this.expiry_); break;
                             default:                    this.handler_(this.bus_, topic, event, this.expiry_); break;
