@@ -20,9 +20,22 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null) {
 
     // refresh cache if source api url is specified
     if ( url?.length ) {
-        const res = await axios.get(url);
-        await bus.set(key, { data: res?.data, expiry: Date.now() + expiry });
-        console.log(`(%O) %O, cache %O updated, expire in %Os`, res?.status, url, key, expiry/1000);
+        let res;
+        try {
+            const res = await axios.get(url);
+            await bus.set(key, { data: res?.data, expiry: Date.now() + expiry });
+            console.log(`(%O) %O, cache %O updated, expire in %Os`, res?.status, url, key, expiry/1000);
+        } catch ( error ) {
+            const status = error?.response?.status;
+            switch ( status ) {
+                case 403:
+                    throw new EvalError(`(${status}) api rate limit reached`);
+                case 404:
+                    throw new EvalError(`(${status}) api offline`);
+                default:
+                    throw new EvalError(`(${status}) api failed`);
+            }
+        }
         return res?.data;
     }
     return null;
