@@ -79,6 +79,7 @@ async function handler(bus, topic, event, expiry) {
         case Config.REDIS.TOPIC.M3_DATA: {
             if ( !body?.callback?.length ) { throw new EvalError(`callback url not specified per ${topic}.${event.id}`); }
 
+            // get data from cache/source api
             let user_data, repo_data, data;
             try {
                 user_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, event, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}`);
@@ -87,6 +88,8 @@ async function handler(bus, topic, event, expiry) {
             } catch ( error ) {
                 data      = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
             }
+
+            // send data via callback
             try {
                 console.log(`POST %O: %O`, body?.callback, data);
                 const res = await axios.post(body?.callback, data)
