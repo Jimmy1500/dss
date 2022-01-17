@@ -43,7 +43,7 @@ async function handler(bus, topic, event, expiry) {
             // send data via callback
             const url = body?.callback;
             try {
-                if ( !url?.length ) { throw new EvalError(`url not specified per ${topic}.${event.id}`); }
+                if ( !url?.length ) { throw new EvalError(`no callback url specified per ${topic}.${event.id}`); }
                 const res = await axios.post(url, this_data)
                 console.log(`(%O) %O: %O`, res?.status, url, this_data);
             } catch ( error ) {
