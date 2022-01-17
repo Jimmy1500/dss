@@ -78,10 +78,7 @@ class App {
         else {
             for ( const [ topic, events ] of streams ) { // `topic` should equal to ${topic[i]}
                 let yes = true;
-                for ( const event of events ) {
-                    const retry_key = `retry.${topic}.${event.id}`;
-                    let retry = Number(await this.bus_.get(retry_key) || 0);
-
+                for ( const event of events ) { 
                     try {
                         console.log('# handling %O.%O: %O', topic, event?.id, event?.body);
                         switch ( this.handler_.constructor.name ) {
@@ -101,6 +98,9 @@ class App {
                         }
                     } catch( error ) {
                         yes = false;
+
+                        const retry_key = `retry.${topic}.${event.id}`;
+                        let retry = Number(await this.bus_.get(retry_key) || 0);
                         if ( ++retry >= retries ) {
                             await this.bus_.free(topic, event.id);
                             await this.bus_.del(retry_key);
