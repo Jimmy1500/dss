@@ -53,8 +53,10 @@ async function stash(bus, topic, user, data, expiry = 0) {
     if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError('no expiry specified'); }
 
     const key  = hashOf(topic, user);
-    const val = { data: data, expiry: Date.now() + expiry };
-    await bus.set(key, val);
+    if ( expiry ) {
+        const val = { data: data, expiry: Date.now() + expiry };
+        await bus.set(key, val);
+    }
 }
 
 async function merge(user, user_data, repo_data) {
