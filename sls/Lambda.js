@@ -1,5 +1,5 @@
 'use strict'
-const { cacheOf, merge, Bus, Config } = require('../src');
+const { cacheOf, stash, merge, Bus, Config } = require('../src');
 
 const bus = new Bus();
 
@@ -18,17 +18,16 @@ async function getDataSync(event){
     const user = body.user;
 
     bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ })
-    await bus.push(Config.REDIS.TOPIC.M3_USER, body);
-    await bus.push(Config.REDIS.TOPIC.M3_REPO, body);
-    await bus.wait(1500);
-
-    let user_data, repo_data, data;
-    try {
-        user_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user);
-        repo_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, user);
-        data      = await merge  (user, user_data, repo_data);
-    } catch ( error ) {
-        data      = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
+    let this_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_DATA, user);
+    if ( !this_data ) {
+        try {
+            const this_user = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}`);
+            const this_repo = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, user, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}/repos`);
+            this_data       = await merge  (user, this_user, this_repo);
+        } catch ( error ) {
+            this_data       = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
+        }
+        stash(bus, Config.REDIS.TOPIC.M3_DATA, user, this_data, 10000);
     }
     bus.disconnect();
 

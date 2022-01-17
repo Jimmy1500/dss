@@ -9,16 +9,18 @@ function hashOf(topic, user) {
 }
 
 async function cacheOf(bus, topic, user, expiry = 0, url = null) {
+    if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError('no expiry specified'); }
+
     const key = hashOf(topic, user);
-    const cache = await bus.get(key);
-    if ( cache ) {
-        const cached = JSON.parse(cache);
-        if ( !cached?.data || !cached?.expiry ) {
+    const val = await bus.get(key);
+    if ( val ) {
+        const value = JSON.parse(val);
+        if ( !value?.data || !value?.expiry ) {
             await bus.del(key);
             console.warn(`cache %O purged for %O, no data or expiry specified`, key, topic);
-        } else if ( cached.expiry > Date.now() ) {
-            console.warn(`cache %O valid for %O, expires in %Os`, key, topic, (cached.expiry - Date.now())/1000);
-            return cached?.data;
+        } else if ( value.expiry > Date.now() ) {
+            console.warn(`cache %O valid for %O, expires in %Os`, key, topic, (value.expiry - Date.now())/1000);
+            return value?.data;
         } else { console.warn(`cache %O expired for %O`, key, topic); }
     } else { console.warn(`no cache %O exists for %O`, key, topic); }
 
@@ -46,8 +48,13 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null) {
     return null;
 }
 
-async function stash(bus, topic, user, data, expiry) {
-    await bus.set(hashOf(topic, user), { data: data, expiry: Date.now() + expiry });
+async function stash(bus, topic, user, data, expiry = 0) {
+    if ( !data ) { throw new EvalError('no data specified'); }
+    if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError('no expiry specified'); }
+
+    const key  = hashOf(topic, user);
+    const val = { data: data, expiry: Date.now() + expiry };
+    await bus.set(key, val);
 }
 
 async function merge(user, user_data, repo_data) {
