@@ -110,9 +110,9 @@ class Cluster {
                     default: 
                         throw new EvalError(`cannot run cluster, invalid cluster state: ${this.state_}`);
                 }
-            } catch ( e )  {
-                console.log(e.stack);
+            } catch ( error )  {
                 running = false;
+                console.error('cluster error, %O', error.stack);
                 break;
             }
         } while (running);
