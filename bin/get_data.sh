@@ -6,7 +6,7 @@ method="POST"
 user="octocat"
 
 for var in "$@"; do
-    if [ $var == "async" -o $var == "-a" ]; then
+    if [ $var == "-a" -o $var == "--async"  ]; then
         mode="async";
     else
         user="${var}";
