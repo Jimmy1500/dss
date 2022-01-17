@@ -27,7 +27,7 @@ async function getDataSync(event){
         } catch ( error ) {
             this_data       = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
         }
-        stash(bus, Config.REDIS.TOPIC.M3_DATA, user, this_data, 10000);
+        stash(bus, Config.REDIS.TOPIC.M3_DATA, user, this_data);
     }
     bus.disconnect();
 
@@ -36,7 +36,7 @@ async function getDataSync(event){
       body: JSON.stringify({
         message: 'data requested (sync)',
         req: body,
-        res: data,
+        res: this_data,
       },null, 2),
     };
 }
