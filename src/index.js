@@ -11,6 +11,7 @@ const Config = {
     POLL_SIZE:      50,
     BLOCK_ON_EMPTY: 500,
     CACHE: {
+        DATA_EXPIRY: 30000,
         USER_EXPIRY: 600000,   
         REPO_EXPIRY: 400000,
     },
