@@ -30,8 +30,7 @@ async function handler(bus, topic, event, expiry) {
             if ( !body?.callback?.length ) { throw new EvalError(`callback url not specified per ${topic}.${event.id}`); }
 
             // get data from cache/source api
-            let data;
-            data = await cacheOf(bus, topic, user);
+            let data = await cacheOf(bus, topic, user);
             if ( !data ) {
                 try {
                     const user_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}`);

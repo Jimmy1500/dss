@@ -20,7 +20,7 @@ async function getDataSync(event){
     bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ })
     await bus.push(Config.REDIS.TOPIC.M3_USER, body);
     await bus.push(Config.REDIS.TOPIC.M3_REPO, body);
-    await bus.wait(Config.IDLE_STRATEGY);
+    await bus.wait(1000);
 
     let user_data, repo_data, data;
     try {
