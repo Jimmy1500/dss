@@ -39,11 +39,11 @@ functions:
             headers:
               Content-Type: "'application/json'"
   repo:
-    handler: src/Lambda.repo
+    handler: sls/Lambda.data
     events:
       - http:
           method: post
-          path: /repo
+          path: /data
           cors: true
           response:
             headers:
