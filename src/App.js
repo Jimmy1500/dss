@@ -80,7 +80,7 @@ class App {
                 let yes = true;
                 for ( const event of events ) {
                     try {
-                        console.log('processing event %O.%O: %O', topic, event?.id, event?.body);
+                        console.log('# event %O.%O: %O', topic, event?.id, event?.body);
                         switch ( this.handler_.constructor.name ) {
                             case 'AsyncFunction': await this.handler_(this.bus_, topic, event, this.expiry_); break;
                             default:                    this.handler_(this.bus_, topic, event, this.expiry_); break;
