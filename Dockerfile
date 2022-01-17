@@ -11,10 +11,11 @@ RUN npm install --global yarn && yarn global add node-gyp --prefix /usr/local
 # project
 WORKDIR ${LAMBDA_TASK_ROOT}
 COPY src src
+COPY index.js index.js
 COPY package.json package.json
 COPY yarn.lock yarn.lock
 RUN yarn install --check-files
 
 # app-server
-# ENTRYPOINT [ "node", "index.js" ]
-ENTRYPOINT [ "tail", "-f", "/dev/null" ]
+ENTRYPOINT [ "node", "index.js" ]
+# ENTRYPOINT [ "tail", "-f", "/dev/null" ]

@@ -1,10 +1,10 @@
-const { Bus, App, Cluster, Config } = require('./src');
+'use strict'
+const { lib, Bus, App, Cluster, Config } = require('./src');
 const { default: axios } = require('axios');
-const hash = require('object-hash');
 
 // const bus = new Bus();
 // bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ });
-// bus.push(Config.REDIS.TOPIC.M3_DATA, { user: 'jimmy1500', callback: 'http://localhost:5000/webhook' });
+// bus.push(Config.REDIS.TOPIC.M3_DATA, { user: 'octocat', callback: 'http://localhost:5000/dev/callback' });
 // bus.push(Config.REDIS.TOPIC.M3_USER, { user: 'octocat' });
 // bus.push(Config.REDIS.TOPIC.M3_REPO, { user: 'octocat' });
 // bus.poll([...Object.values(Config.REDIS.TOPIC)], [ 0, 0, 0 ], 10, 0).then(s  => { console.log('streams: %O', s); bus.flush(); });
@@ -16,55 +16,6 @@ const hash = require('object-hash');
 //         bus.disconnect();
 //     })
 // );
-
-async function cacheOf(bus, topic, event, expiry = 0, url = null) {
-    const key   = hash.sha1({ topic: topic, body: event?.body });
-    const cache = await bus.get(key);
-    if ( cache ) {
-        const cached = JSON.parse(cache);
-        if ( !cached?.data || !cached?.expiry ) {
-            await bus.del(key);
-            console.warn(`cache %O purged, no data or expiry specified`, key);
-        } else if ( cached.expiry > Date.now() ) {
-            console.warn(`cache %O valid, expire in %Os`, key, (cached.expiry - Date.now())/1000);
-            return cached?.data;
-        } else { console.warn(`cache %O expired`, key); }
-    } else { console.warn(`no cache %O exists`, key); }
-
-    // refresh cache if source api url is specified
-    if ( url?.length ) {
-        const res = await axios.get(url);
-        await bus.set(key, { data: res?.data, expiry: Date.now() + expiry });
-        console.log(`(%O) %O, cache %O updated, expire in %Os`, res?.status, url, key, expiry/1000);
-        return res?.data;
-    }
-    return null;
-}
-
-async function merge(user, user_data, repo_data) {
-    if ( user_data && repo_data ) {
-        return {
-            user_name:      user_data?.login,
-            display_name:   user_data?.name ,
-            avatar:         user_data?.avatar_url,
-            geo_location:   user_data?.location,
-            email:          user_data?.email,
-            url:            user_data?.url,
-            created_at:     (user_data?.created_at || new Date().toISOString()).replace('T', ' ').replace('Z', ''),
-            repos:          repo_data?.map(r => {
-                return {
-                    name: r?.name,
-                    url:  r?.html_url
-                }
-            }),
-            code: 'SUCCESS',
-            message: `data recovered for user '${user}'`,
-        };
-    } else {
-        if ( !user_data ) { throw new EvalError(`no user data recovered`); }
-        if ( !repo_data ) { throw new EvalError(`no repo data recovered`); }
-    }
-}
 
 async function handler(bus, topic, event, expiry) {
     if ( !(bus instanceof Bus)      ) { throw new TypeError('bus must be instance of Bus');     }
@@ -82,9 +33,9 @@ async function handler(bus, topic, event, expiry) {
             // get data from cache/source api
             let user_data, repo_data, data;
             try {
-                user_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, event, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}`);
-                repo_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, event, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}/repos`);
-                data      = await merge  (user, user_data, repo_data);
+                user_data = await lib.cacheOf(bus, Config.REDIS.TOPIC.M3_USER, event, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}`);
+                repo_data = await lib.cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, event, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}/repos`);
+                data      = await lib.merge  (user, user_data, repo_data);
             } catch ( error ) {
                 data      = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
             }
@@ -100,12 +51,12 @@ async function handler(bus, topic, event, expiry) {
             break;
         }
         case Config.REDIS.TOPIC.M3_USER: {
-            const data = await cacheOf(bus, topic, event, expiry, `${Config.GIT.API_BASE_URL}/${user}`);
+            const data = await lib.cacheOf(bus, topic, event, expiry, `${Config.GIT.API_BASE_URL}/${user}`);
             if ( !data ) { throw new EvalError(`${topic}.${event.id}: no data recovered for user '${user}'`); }
             break;
         }
         case Config.REDIS.TOPIC.M3_REPO: {
-            const data = await cacheOf(bus, topic, event, expiry, `${Config.GIT.API_BASE_URL}/${user}/repos`);
+            const data = await lib.cacheOf(bus, topic, event, expiry, `${Config.GIT.API_BASE_URL}/${user}/repos`);
             if ( !data ) { throw new EvalError(`${topic}.${event.id}: no data recovered for user '${user}'`); }
             break;
         }

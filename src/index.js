@@ -1,3 +1,4 @@
+const lib = require('./lib')
 const { Bus } = require('./Bus');
 const { App, NETWORK_TYPE } = require('./App');
 const { Cluster, CLUSTER_STATUS } = require('./Cluster');
@@ -20,6 +21,7 @@ const Config = {
 }
 
 module.exports = {
+    lib,
     Bus,
     App,
     Cluster,

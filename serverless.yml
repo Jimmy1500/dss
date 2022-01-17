@@ -38,22 +38,32 @@ functions:
           response:
             headers:
               Content-Type: "'application/json'"
-  repo:
-    handler: sls/Lambda.data
+  data_sync:
+    handler: sls/Lambda.getDataSync
     events:
       - http:
           method: post
-          path: /data
+          path: /data/sync
           cors: true
           response:
             headers:
               Content-Type: "'application/json'"
-  webhook:
-    handler: sls/Lambda.webhook
+  data_async:
+    handler: sls/Lambda.getDataAsync
     events:
       - http:
           method: post
-          path: /webhook
+          path: /data/async
+          cors: true
+          response:
+            headers:
+              Content-Type: "'application/json'"
+  callback:
+    handler: sls/Lambda.callback
+    events:
+      - http:
+          method: post
+          path: /callback
           cors: true
           timeout: 30
           request:

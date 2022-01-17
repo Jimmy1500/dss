@@ -1,5 +1,5 @@
 'use strict'
-const { Bus, Config } = require('../src');
+const { lib, Bus, Config } = require('../src');
 
 const bus = new Bus();
 
@@ -7,36 +7,71 @@ async function health(event) {
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: 'Go Serverless v1.0! Your function executed successfully!',
+        message: 'serverless functions online!',
         input: event,
       },null, 2),
     };
 }
 
-async function data(event){
-    bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ });
+async function getDataSync(event){
+    const body = JSON.parse(event.body);
+    const user = body.user;
+
+    bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ })
+    await bus.push(Config.REDIS.TOPIC.M3_USER, body);
+    await bus.push(Config.REDIS.TOPIC.M3_REPO, body);
+    await bus.wait(5000);
+
+    let user_data, repo_data, data;
+    try {
+        user_data = await lib.cacheOf(bus, Config.REDIS.TOPIC.M3_USER, event);
+        repo_data = await lib.cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, event);
+        data      = await lib.merge  (user, user_data, repo_data);
+    } catch ( error ) {
+        data      = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
+    }
     bus.disconnect();
+
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: 'data requested',
-        input: { body: event.body },
+        message: 'data requested (sync)',
+        req: body,
+        res: data,
       },null, 2),
     };
 }
 
-async function webhook(event){
+async function getDataAsync(event){
+    const body = JSON.parse(event.body);
+
+    bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ })
+    await bus.push(Config.REDIS.TOPIC.M3_DATA, body);
+    bus.disconnect();
+
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: 'Go Serverless v1.0! Your function executed successfully!',
-        input: { body: event.body },
+        message: 'data requested (async)',
+        req: body
+      },null, 2),
+    };
+}
+
+async function callback(event){
+    const body = JSON.parse(event.body);
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: 'callback received!',
+        req: body
       },null, 2),
     };
 }
 
 module.exports = {
     health,
-    data,
-    webhook
+    getDataSync,
+    getDataAsync,
+    callback
 }
