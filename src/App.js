@@ -104,10 +104,10 @@ class App {
                         if ( ++retry >= retries ) {
                             await this.bus_.free(topic, event.id);
                             await this.bus_.del(retry_key);
-                            console.error("%O.%O freed, %O, retry %O of %O ", topic, event.id, error.message, retry, retries);
+                            console.error("%O.%O freed, %O, retried %O of %O ", topic, event.id, error.message, retry, retries);
                         } else {
                             await this.bus_.set(retry_key, retry);
-                            console.error("%O.%O failed, %O, retry %O of %O", topic, event.id, error.stack, retry, retries);
+                            console.error("%O.%O failed, %O, retried %O of %O", topic, event.id, error.stack, retry, retries);
                         }
                     }
                 } // for ( const event of events )
