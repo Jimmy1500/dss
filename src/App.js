@@ -72,8 +72,9 @@ class App {
         console.log('app %O stopped, last event id: %O', this.id_, this.last_id_);
     }
     async work(retries = 10) {
-        const streams = await this.bus_.poll(this.topic_, this.last_id_, this.count_, this.block_);
+        if ( retries < 0 ) { throw new EvalError('no retries specified'); }
 
+        const streams = await this.bus_.poll(this.topic_, this.last_id_, this.count_, this.block_);
         if ( !streams?.length ) { console.warn("topic %O drained", this.topic_); }
         else {
             for ( const [ topic, events ] of streams ) { // `topic` should equal to ${topic[i]}
@@ -102,8 +103,18 @@ class App {
                         const retry_key = `retry.${topic}.${event.id}`;
                         let retry = Number(await this.bus_.get(retry_key) || 0);
                         if ( ++retry >= retries ) {
+                            await this.bus_.del (retry_key);
                             await this.bus_.free(topic, event.id);
-                            await this.bus_.del(retry_key);
+
+                            const body = JSON.parse(event?.body || {});
+                            await this.bus_.push(topic, {
+                                error: {
+                                    code:    'FAILURE',
+                                    message: `cannot handle request, retried ${retry} of ${retries} times`,
+                                    request:  body
+                                },
+                                callback: body?.callback
+                            });
                             console.error("%O.%O freed, %O, retried %O of %O", topic, event.id, error.message, retry, retries);
                         } else {
                             await this.bus_.set(retry_key, retry);

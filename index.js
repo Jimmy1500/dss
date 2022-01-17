@@ -22,45 +22,48 @@ async function handler(bus, topic, event, expiry) {
     if ( !event?.body?.length       ) { throw new TypeError('no body specified in event');      }
 
     const body = JSON.parse(event?.body);
-    if ( !body?.user?.length ) { throw new EvalError('no user specified in event.body'); }
+    let this_data = body?.error;
 
-    let this_data;
-    const user = body.user;
-    const rate_url = `${Config.GIT.API_BASE_URL}/rate_limit`;
+    if ( !this_data ) {
+        if ( !body?.user?.length ) { throw new EvalError('no user specified in event.body'); }
 
-    switch (topic) {
-        case Config.REDIS.TOPIC.M3_DATA: {
-            // get data from cache/source api
-            this_data = await cacheOf(bus, topic, user);
-            if ( !this_data ) {
-                try {
-                    const this_user = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/users/${user}`,       rate_url);
-                    const this_repo = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, user, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/users/${user}/repos`, rate_url);
-                    this_data       = await merge  (user, this_user, this_repo);
-                } catch ( error ) {
-                    this_data       = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
+        const user = body.user;
+        const rate_url = `${Config.GIT.API_BASE_URL}/rate_limit`;
+
+        switch (topic) {
+            case Config.REDIS.TOPIC.M3_DATA: {
+                // get data from cache/source api
+                this_data = await cacheOf(bus, topic, user);
+                if ( !this_data ) {
+                    try {
+                        const this_user = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/users/${user}`,       rate_url);
+                        const this_repo = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, user, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/users/${user}/repos`, rate_url);
+                        this_data       = await merge  (user, this_user, this_repo);
+                    } catch ( error ) {
+                        this_data       = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
+                    }
+                    stash(bus, topic, user, this_data, expiry);
                 }
-                stash(bus, topic, user, this_data, expiry);
+                break;
             }
-            break;
-        }
-        case Config.REDIS.TOPIC.M3_USER: {
-            this_data = await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/users/${user}`,       rate_url);
-            break;
-        }
-        case Config.REDIS.TOPIC.M3_REPO: {
-            this_data = await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/users/${user}/repos`, rate_url);
-            break;
-        }
-        default: {
-            throw new EvalError('unrecognized event %O.%O', topic, event);
+            case Config.REDIS.TOPIC.M3_USER: {
+                this_data = await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/users/${user}`,       rate_url);
+                break;
+            }
+            case Config.REDIS.TOPIC.M3_REPO: {
+                this_data = await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/users/${user}/repos`, rate_url);
+                break;
+            }
+            default: {
+                throw new EvalError('unrecognized event %O.%O', topic, event);
+            }
         }
     }
 
     // send data via callback
     const url = body?.callback;
-    if      ( !url?.length ) { console.warn("no callback specified, data will not be sent");   }
-    else if ( !this_data   ) { console.warn("no data recovered, callback will not be called"); }
+    if      ( !url?.length ) { console.warn('no callback specified per %O.%O, data will not be sent', topic, event.id); }
+    else if ( !this_data   ) { console.warn('no data recovered per %O.%O, callback will not be hit',  topic, event.id); }
     else {
         try {
             const res = await axios.post(url, this_data)
