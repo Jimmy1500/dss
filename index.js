@@ -41,12 +41,19 @@ async function handler(bus, topic, event, expiry) {
             }
 
             // send data via callback
+            const callback = body?.callback;
             try {
-                if ( !body?.callback?.length ) { throw new EvalError(`url not specified per ${topic}.${event.id}`); }
-                const res = await axios.post(body?.callback, data)
-                console.log(`(%O) POST %O: %O`, res?.status, body?.callback, data);
+                if ( !callback?.length ) { throw new EvalError(`url not specified per ${topic}.${event.id}`); }
+                const res = await axios.post(callback, data)
+                console.log(`(%O) %O: %O`, res?.status, callback, data);
             } catch ( error ) {
-                throw new EvalError(`callback ${body?.callback} failed, ${error.message}`)
+                const status  = error?.response?.status         || 400;
+                const message = error?.response?.data?.message  || error.message;
+                switch ( status ) {
+                    case 403: throw new EvalError(`(${status}) callback ${callback} forbidden, ${message}`);
+                    case 404: throw new EvalError(`(${status}) callback ${callback} offline, ${message}`);
+                    default:  throw new EvalError(`(${status}) callback ${callback} failed, ${message}`);
+                }
             }
             break;
         }

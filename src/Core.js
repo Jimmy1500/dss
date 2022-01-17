@@ -30,15 +30,16 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null) {
             console.log(`(%O) %O, cache %O updated for %O, expires in %Os`, res?.status, url, key, topic, expiry/1000);
             return res?.data;
         } catch ( error ) {
-            const { status, data } = error?.response;
+            const status  = error?.response?.status         || 400;
+            const message = error?.response?.data?.message  || error.message;
             switch ( status ) {
-                case 403: throw new EvalError(`(${status}) api rate limit reached`);
+                case 403: throw new EvalError(`(${status}) api forbidden, ${message}`);
                 case 404:
-                    switch ( data?.message ) {
+                    switch ( message ) {
                         case 'Not Found': throw new EvalError(`(${status}) user ${user} not found`);
-                        default: throw new EvalError(`(${status}) api offline`);
+                        default:          throw new EvalError(`(${status}) api offline, ${message}`);
                     }
-                default: throw new EvalError(`(${status}) api failed`);
+                default: throw new EvalError(`(${status}) api failed, ${message}`);
             }
         }
     }
