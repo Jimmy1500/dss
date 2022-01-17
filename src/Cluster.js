@@ -15,7 +15,7 @@ class Cluster {
     constructor(
         network_type = NETWORK_TYPE.SHARED,
         idle_ms = 0,
-        retries = 10
+        retries = 1
     ) {
         if ( typeof idle_ms != 'number' || idle_ms < 0 ) { throw new EvalError(`no idle_ms specified`); }
         if ( typeof retries != 'number' || retries < 0 ) { throw new EvalError(`no retries specified`); }
