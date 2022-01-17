@@ -27,7 +27,7 @@ async function getDataSync(event){
         } catch ( error ) {
             this_data       = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
         }
-        stash(bus, Config.REDIS.TOPIC.M3_DATA, user, this_data);
+        stash(bus, Config.REDIS.TOPIC.M3_DATA, user, this_data, Config.CACHE.DATA_EXPIRY);
     }
     bus.disconnect();
 
