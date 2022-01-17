@@ -35,8 +35,8 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null
                 const reset       = rate?.reset     || 'N/A';
                 const used        = rate?.used      || 'N/A'
 
-                if ( !remaining ) { throw new EvalError(`api rate limit reached ${used} of ${limit}, resets in ${reset}s`); }
-                console.log(`(%O) api rate limit used %O of %O, %O left, resets in %Os`, usage.status, used, limit, remaining, reset);
+                if ( !remaining ) { throw new EvalError(`rate limit reached ${used} of ${limit}, resets in ${reset}s`); }
+                console.log(`(%O) rate limit used %O of %O, %O left, resets in %Os`, usage.status, used, limit, remaining, reset);
             }
 
             const res   = await axios.get(url);
