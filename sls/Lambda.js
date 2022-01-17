@@ -7,8 +7,8 @@ async function health(event) {
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: 'serverless functions online!',
-        input: event,
+        message: 'serverless health check: functions online!',
+        event: event,
       },null, 2),
     };
 }
