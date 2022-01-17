@@ -1,8 +1,7 @@
-const { App, Cluster, Config } = require('./src');
+const { Bus, App, Cluster, Config } = require('./src');
 const { default: axios } = require('axios');
 const hash = require('object-hash');
 
-// const { Bus } = require('./src/Bus');
 // const bus = new Bus();
 // bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ });
 
