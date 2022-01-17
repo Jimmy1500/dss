@@ -22,8 +22,8 @@ services:
       - AWS_S3_BUCKET=m3-api
       - AWS_ACCESS_KEY_ID=FAKE
       - AWS_SECRET_ACCESS_KEY=FAKE
+      - GIT_API_BASE_URL=https://api.github.com
       - GIT_ACCESS_TOKEN=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
-      - GIT_API_BASE_URL=https://api.github.com/users
     logging:
       options:
         max-size: 50m

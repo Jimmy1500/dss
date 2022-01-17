@@ -21,8 +21,8 @@ async function getDataSync(event){
     let this_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_DATA, user);
     if ( !this_data ) {
         try {
-            const this_user = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}`);
-            const this_repo = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, user, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}/repos`);
+            const this_user = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/users/${user}`);
+            const this_repo = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, user, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/users/${user}/repos`);
             this_data       = await merge  (user, this_user, this_repo);
         } catch ( error ) {
             this_data       = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
