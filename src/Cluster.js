@@ -12,8 +12,13 @@ const CLUSTER_STATUS =  {
 }
 
 class Cluster {
-    constructor(network_type = NETWORK_TYPE.SHARED, idle_ms = 0) {
-        if ( typeof idle_ms != 'number' ) { throw new TypeError(`idle_ms must be number`); }
+    constructor(
+        network_type = NETWORK_TYPE.SHARED,
+        idle_ms = 0,
+        retries = 10
+    ) {
+        if ( typeof idle_ms != 'number' || failover_retry < 0 ) { throw new EvalError(`no idle_ms specified`); }
+        if ( typeof retries != 'number' || failover_retry < 0 ) { throw new EvalError(`no retries specified`); }
 
         switch( network_type ) {
             case NETWORK_TYPE.SHARED:
@@ -23,9 +28,10 @@ class Cluster {
                 this.bus_ = null;
                 break;
         }
-        this.apps_  = [];
-        this.state_ = CLUSTER_STATUS.IDLE;
-        this.idle_  = idle_ms > 0 ? idle_ms : 0;
+        this.apps_      = [];
+        this.state_     = CLUSTER_STATUS.IDLE;
+        this.idle_      = idle_ms;
+        this.retries_   = retries;
         console.log('cluster created, idle_strategy: %O ms', this.idle_);
     }
 
@@ -84,7 +90,7 @@ class Cluster {
     }
 
     async work() {
-        for ( const app of this.apps_ ) { await app.work(); }
+        for ( const app of this.apps_ ) { await app.work(this.retries_); }
     }
 
     async run() {

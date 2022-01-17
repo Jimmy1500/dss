@@ -71,7 +71,7 @@ class App {
         }
         console.log('app %O stopped, last event id: %O', this.id_, this.last_id_);
     }
-    async work(retries = 20) {
+    async work(retries = 10) {
         const streams = await this.bus_.poll(this.topic_, this.last_id_, this.count_, this.block_);
 
         if ( !streams?.length ) { console.warn("topic %O drained", this.topic_); }
