@@ -27,27 +27,26 @@ async function handler(bus, topic, event, expiry) {
 
     switch (topic) {
         case Config.REDIS.TOPIC.M3_DATA: {
-            if ( !body?.callback?.length ) { throw new EvalError(`callback url not specified per ${topic}.${event.id}`); }
-
             // get data from cache/source api
-            let data = await cacheOf(bus, topic, user);
-            if ( !data ) {
+            let this_data = await cacheOf(bus, topic, user);
+            if ( !this_data ) {
                 try {
-                    const user_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}`);
-                    const repo_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, user, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}/repos`);
-                    data            = await merge  (user, user_data, repo_data);
+                    const this_user = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}`);
+                    const this_repo = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, user, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}/repos`);
+                    this_data       = await merge  (user, this_user, this_repo);
                 } catch ( error ) {
-                    data      = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
+                    this_data       = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
                 }
-                stash(bus, topic, user, data, expiry);
+                stash(bus, topic, user, this_data, expiry);
             }
 
             // send data via callback
             try {
+                if ( !body?.callback?.length ) { throw new EvalError(`url not specified per ${topic}.${event.id}`); }
                 const res = await axios.post(body?.callback, data)
                 console.log(`(%O) POST %O: %O`, res?.status, body?.callback, data);
             } catch ( error ) {
-                throw new EvalError(`callback url ${body?.callback} offline, ${error.message}`)
+                throw new EvalError(`callback ${body?.callback} failed, ${error.message}`)
             }
             break;
         }
