@@ -24,8 +24,8 @@ async function getDataSync(event){
 
     let user_data, repo_data, data;
     try {
-        user_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, event);
-        repo_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, event);
+        user_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user);
+        repo_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, user);
         data      = await merge  (user, user_data, repo_data);
     } catch ( error ) {
         data      = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };

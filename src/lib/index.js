@@ -2,12 +2,10 @@
 const hash = require('object-hash');
 const { default: axios } = require('axios');
 
-async function cacheOf(bus, topic, event, expiry = 0, url = null) {
-    const body  = JSON.parse(event?.body);
-    if ( !(body instanceof Object)         ) { throw new TypeError('no body specified in event');           }
-    if ( typeof body?.user     != 'string' ) { throw new TypeError('no user specified in event body');      }
+async function cacheOf(bus, topic, user, expiry = 0, url = null) {
+    if ( !user?.length ) { throw new TypeError('no user specified in body'); }
 
-    const key   = hash.sha1({ id: `${topic}|${body?.user}` });
+    const key   = hash.sha1({ cache_id: `${topic}|${user}` });
     const cache = await bus.get(key);
     if ( cache ) {
         const cached = JSON.parse(cache);
