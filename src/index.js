@@ -9,7 +9,7 @@ const Config = {
     CLUSTER_STATUS,
     IDLE_STRATEGY:  5,
     POLL_SIZE:      50,
-    BLOCK_ON_EMPTY: 1000,
+    BLOCK_ON_EMPTY: 500,
     CACHE: {
         USER_EXPIRY: 600000,   
         REPO_EXPIRY: 400000,
