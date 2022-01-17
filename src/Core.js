@@ -38,7 +38,7 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null) {
                 case 403: throw new EvalError(`(${status}) api forbidden, ${message}`);
                 case 404:
                     switch ( message ) {
-                        case 'Not Found': throw new EvalError(`(${status}) user ${user} not found`);
+                        case 'Not Found': throw new EvalError(`(${status}) user '${user}' not found`);
                         default:          throw new EvalError(`(${status}) api offline, ${message}`);
                     }
                 default: throw new EvalError(`(${status}) api failed, ${message}`);
