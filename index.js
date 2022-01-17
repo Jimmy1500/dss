@@ -41,9 +41,8 @@ async function handler(bus, topic, event, expiry) {
 
             // send data via callback
             try {
-                console.log(`POST %O: %O`, body?.callback, data);
                 const res = await axios.post(body?.callback, data)
-                console.log(`status %O`, res?.status);
+                console.log(`(%O) POST %O: %O`, res?.status, body?.callback, data);
             } catch ( error ) {
                 throw new EvalError(`callback url ${body?.callback} offline, ${error.message}`)
             }
