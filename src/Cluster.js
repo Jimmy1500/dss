@@ -88,7 +88,7 @@ class Cluster {
     }
 
     async run() {
-        let running = true;
+        let next = true;
         do {
             try {
                 switch(this.state_) {
@@ -102,18 +102,18 @@ class Cluster {
                         await this.stop();
                         break;
                     case CLUSTER_STATUS.STOPPED:
-                        running = false;
+                        next = false;
                         break;
                     default: 
                         throw new EvalError(`cannot run cluster, invalid cluster state: ${this.state_}`);
                 }
                 if ( this.idle_ ) { await this.wait(this.idle_); }
             } catch ( error )  {
-                running = false;
+                next = false;
                 console.error('cluster error, %O', error.stack);
                 break;
             }
-        } while (running);
+        } while ( next );
     }
 
     async wait(ms) { return new Promise((resolve) => { setTimeout(resolve, ms); }); }
