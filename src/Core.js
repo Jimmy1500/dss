@@ -8,6 +8,7 @@ function hashOf(topic, user) {
     return hash.sha1({ cache_id: `${topic}|${user}` });
 }
 
+// get valid cache, or get data from source api (refreshes cache) with rate limit check (optional)
 async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null) {
     if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError('no expiry specified'); }
 
@@ -61,6 +62,7 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null
     return null;
 }
 
+// stash cache
 async function stash(bus, topic, user, data, expiry = 0) {
     if ( !data ) { throw new EvalError('no data specified'); }
     if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError('no expiry specified'); }
@@ -71,6 +73,7 @@ async function stash(bus, topic, user, data, expiry = 0) {
     }
 }
 
+// merge user data and repo data into final output (view)
 async function merge(user, user_data, repo_data) {
     if ( typeof user != 'string' ) { throw new TypeError('username must be string'); }
     if ( user_data && repo_data ) {
