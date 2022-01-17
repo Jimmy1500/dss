@@ -5,7 +5,7 @@ const hash = require('object-hash');
 // const bus = new Bus();
 // bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ });
 
-// bus.push(Config.REDIS.TOPIC.M3_DATA, { user: 'octocat', callback: 'http://localhost:5000/webhook' });
+// bus.push(Config.REDIS.TOPIC.M3_DATA, { user: 'jimmy1500', callback: 'http://localhost:5000/webhook' });
 // bus.push(Config.REDIS.TOPIC.M3_USER, { user: 'octocat' });
 // bus.push(Config.REDIS.TOPIC.M3_REPO, { user: 'octocat' });
 // bus.poll([...Object.values(Config.REDIS.TOPIC)], [ 0, 0, 0 ], 10, 0).then(s  => { console.log('streams: %O', s); bus.flush(); });
@@ -19,25 +19,25 @@ const hash = require('object-hash');
 //     })
 // );
 
-async function cacheOf(bus, topic, event, expiry, url = null) {
+async function cacheOf(bus, topic, event, expiry = 0, url = null) {
     const key   = hash.sha1({ topic: topic, body: event?.body });
     const cache = await bus.get(key);
     if ( cache ) {
         const cached = JSON.parse(cache);
         if ( !cached?.data || !cached?.expiry ) {
             await bus.del(key);
-            console.warn(`cache %O deleted, no data or expiry specified`, key);
+            console.warn(`cache %O purged, no data or expiry specified`, key);
         } else if ( cached.expiry > Date.now() ) {
-            console.warn(`cache %O recovered per %O.%O, expire in %Os`, key, topic, event?.id, (cached.expiry - Date.now())/1000);
+            console.warn(`cache %O valid, expire in %Os`, key, (cached.expiry - Date.now())/1000);
             return cached?.data;
         } else { console.warn(`cache %O expired`, key); }
-    } else { console.warn(`no cache exists per %O.%O`, topic, event?.id); }
+    } else { console.warn(`no cache %O`, key); }
 
     // refresh cache if source api url is specified
     if ( url?.length ) {
         const res = await axios.get(url);
         await bus.set(key, { data: res?.data, expiry: Date.now() + expiry });
-        console.log(`data retrieved per %O.%O (%O), cache %O updated, expire in %Os`, topic, event?.id, res?.status, key, expiry/1000);
+        console.log(`(%O) %O, cache %O updated, expire in %Os`, res?.status, url, key, expiry/1000);
         return res?.data;
     }
     return null;
@@ -56,16 +56,21 @@ async function handler(bus, topic, event, expiry) {
         case Config.REDIS.TOPIC.M3_DATA: {
             if ( !body?.callback?.length ) { throw new EvalError(`callback url not specified per ${topic}.${event.id}`); }
 
-            const user_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, event, expiry);
-            const repo_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, event, expiry);
+            const user_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, event);
+            const repo_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, event);
             if ( user_data && repo_data ) {
-                console.log(`POST %O`, body?.callback);
-                const res = await axios.post(body?.callback, { ...user_data, repos: repo_data })
-                console.log(`POST(%O) %O`, res?.status, body?.callback);
+                try {
+                    console.log(`POST -> %O...`, body?.callback);
+                    const data = { ...user_data, repos: repo_data };
+                    const res = await axios.post(body?.callback, data)
+                    console.log(`POST -> %O, %O`, body?.callback, res?.status);
+                } catch (error) {
+                    throw new EvalError(`POST -> ${body?.callback}, ${error.message}`)
+                }
             } else {
-                if ( !user_data ) { bus.push(Config.REDIS.TOPIC.M3_USER, { user: user }); }
-                if ( !repo_data ) { bus.push(Config.REDIS.TOPIC.M3_REPO, { user: user }); }
-                throw new EvalError(`no data available per ${topic}.${event.id}`);
+                if ( !user_data ) { bus.push(Config.REDIS.TOPIC.M3_USER, body); }
+                if ( !repo_data ) { bus.push(Config.REDIS.TOPIC.M3_REPO, body); }
+                throw new EvalError(`user/repo data no available`);
             }
             break;
         }

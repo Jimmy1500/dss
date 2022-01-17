@@ -6,12 +6,12 @@ const { LOCALE, REDIS, AWS, GIT } = require('./Env');
 const Config = {
     NETWORK_TYPE,
     CLUSTER_STATUS,
-    IDLE_STRATEGY:  0,
+    IDLE_STRATEGY:  2000,
     POLL_SIZE:      50,
     BLOCK_ON_EMPTY: 1000,
     CACHE: {
-        USER_EXPIRY: 30000,   
-        REPO_EXPIRY: 20000,
+        USER_EXPIRY: 600000,   
+        REPO_EXPIRY: 400000,
     },
     LOCALE,
     REDIS,

@@ -84,10 +84,7 @@ class Cluster {
     }
 
     async work() {
-        for ( const app of this.apps_ ) {
-            await app.work();
-            if ( this.idle_ ) { await this.wait(this.idle_); }
-        }
+        for ( const app of this.apps_ ) { await app.work(); }
     }
 
     async run() {
@@ -110,6 +107,7 @@ class Cluster {
                     default: 
                         throw new EvalError(`cannot run cluster, invalid cluster state: ${this.state_}`);
                 }
+                if ( this.idle_ ) { await this.wait(this.idle_); }
             } catch ( error )  {
                 running = false;
                 console.error('cluster error, %O', error.stack);

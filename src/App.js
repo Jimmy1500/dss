@@ -98,7 +98,7 @@ class App {
                         }
                     } catch( error ) {
                         yes = false;
-                        console.error("event %O failed, %O", event, error.stack);
+                        console.error("%O.%O failed, %O", topic, event.id, error.message);
                     }
                 } // for ( const event of events )
             }
