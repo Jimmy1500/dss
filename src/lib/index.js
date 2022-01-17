@@ -24,11 +24,11 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null) {
 
     // refresh cache if source api url is specified
     if ( url?.length ) {
-        let res;
         try {
             const res = await axios.get(url);
             await bus.set(key, { data: res?.data, expiry: Date.now() + expiry });
             console.log(`(%O) %O, cache %O updated, expire in %Os`, res?.status, url, key, expiry/1000);
+            return res?.data;
         } catch ( error ) {
             const { status, data } = error?.response;
             switch ( status ) {
@@ -41,7 +41,6 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null) {
                 default: throw new EvalError(`(${status}) api failed`);
             }
         }
-        return res?.data;
     }
     return null;
 }
