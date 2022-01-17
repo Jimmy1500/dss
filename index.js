@@ -23,13 +23,15 @@ async function handler(bus, topic, event, expiry) {
 
     const body = JSON.parse(event?.body);
     if ( !body?.user?.length ) { throw new EvalError('no user specified in event.body'); }
-    const user = body.user;
 
+    let this_data;
+    const user = body.user;
     const rate_url = `${Config.GIT.API_BASE_URL}/rate_limit`;
+
     switch (topic) {
         case Config.REDIS.TOPIC.M3_DATA: {
             // get data from cache/source api
-            let this_data = await cacheOf(bus, topic, user);
+            this_data = await cacheOf(bus, topic, user);
             if ( !this_data ) {
                 try {
                     const this_user = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/users/${user}`,       rate_url);
@@ -40,35 +42,37 @@ async function handler(bus, topic, event, expiry) {
                 }
                 stash(bus, topic, user, this_data, expiry);
             }
-
-            // send data via callback
-            const url = body?.callback;
-            try {
-                if ( !url?.length ) { throw new EvalError(`no callback url specified per ${topic}.${event.id}`); }
-                const res = await axios.post(url, this_data)
-                console.log(`(%O) %O: %O`, res?.status, url, this_data);
-            } catch ( error ) {
-                const status  = error?.response?.status         || 400;
-                const message = error?.response?.data?.message  || error.message;
-                switch ( status ) {
-                    case 403: throw new EvalError(`(${status}) callback ${url} forbidden, ${message}`);
-                    case 404: throw new EvalError(`(${status}) callback ${url} offline, ${message}`);
-                    default:  throw new EvalError(`(${status}) callback ${url} failed, ${message}`);
-                }
-            }
             break;
         }
         case Config.REDIS.TOPIC.M3_USER: {
-            await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/users/${user}`,       rate_url);
+            this_data = await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/users/${user}`,       rate_url);
             break;
         }
         case Config.REDIS.TOPIC.M3_REPO: {
-            await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/users/${user}/repos`, rate_url);
+            this_data = await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/users/${user}/repos`, rate_url);
             break;
         }
         default: {
-            console.warn('unrecognized topic: %O, event: %O', topic, event);
-            break;
+            throw new EvalError('unrecognized event %O.%O', topic, event);
+        }
+    }
+
+    // send data via callback
+    const url = body?.callback;
+    if      ( !url?.length ) { console.warn("no callback specified, data will not be sent");   }
+    else if ( !this_data   ) { console.warn("no data recovered, callback will not be called"); }
+    else {
+        try {
+            const res = await axios.post(url, this_data)
+            console.log(`(%O) %O: %O`, res?.status, url, this_data);
+        } catch ( error ) {
+            const status  = error?.response?.status         || 400;
+            const message = error?.response?.data?.message  || error.message;
+            switch ( status ) {
+                case 403: throw new EvalError(`(${status}) callback ${url} forbidden, ${message}`);
+                case 404: throw new EvalError(`(${status}) callback ${url} offline, ${message}`);
+                default:  throw new EvalError(`(${status}) callback ${url} failed, ${message}`);
+            }
         }
     }
 }

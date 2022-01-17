@@ -29,12 +29,12 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null
     if ( url?.length ) {
         try {
             if ( rate_url?.length ) {
-                const usage = await axios.get(rate_url);
-                const rate  = usage?.data?.rate;
-                const limit       = rate?.limit     || 'N/A';
-                const remaining   = rate?.remaining || 0;
-                const reset       = rate?.reset     || 'N/A';
-                const used        = rate?.used      || 'N/A'
+                const usage     = await axios.get(rate_url);
+                const rate      = usage?.data?.rate;
+                const limit     = rate?.limit     || 'N/A';
+                const remaining = rate?.remaining || 0;
+                const reset     = rate?.reset     || 'N/A';
+                const used      = rate?.used      || 'N/A'
 
                 if ( !remaining ) { throw new EvalError(`rate limit reached ${used} of ${limit}, resets in ${reset}s`); }
                 console.log(`(%O) rate limit used %O of %O, %O left, resets in %Os`, usage.status, used, limit, remaining, reset);
@@ -76,28 +76,26 @@ async function stash(bus, topic, user, data, expiry = 0) {
 // merge user data and repo data into final output (view)
 async function merge(user, user_data, repo_data) {
     if ( typeof user != 'string' ) { throw new TypeError('username must be string'); }
-    if ( user_data && repo_data ) {
-        return {
-            user_name:      user_data?.login,
-            display_name:   user_data?.name ,
-            avatar:         user_data?.avatar_url,
-            geo_location:   user_data?.location,
-            email:          user_data?.email,
-            url:            user_data?.url,
-            created_at:     (user_data?.created_at || new Date().toISOString()).replace('T', ' ').replace('Z', ''),
-            repos:          repo_data?.map(r => {
-                return {
-                    name: r?.name,
-                    url:  r?.html_url
-                }
-            }),
-            code: 'SUCCESS',
-            message: `data recovered for user '${user}'`,
-        };
-    } else {
-        if ( !user_data ) { throw new EvalError(`missing user data`); }
-        if ( !repo_data ) { throw new EvalError(`missing repo data`); }
-    }
+    if ( !user_data ) { throw new EvalError(`missing user data`); }
+    if ( !repo_data ) { throw new EvalError(`missing repo data`); }
+
+    return {
+        user_name:      user_data?.login,
+        display_name:   user_data?.name ,
+        avatar:         user_data?.avatar_url,
+        geo_location:   user_data?.location,
+        email:          user_data?.email,
+        url:            user_data?.url,
+        created_at:     (user_data?.created_at || new Date().toISOString()).replace('T', ' ').replace('Z', ''),
+        repos:          repo_data?.map(r => {
+            return {
+                name: r?.name,
+                url:  r?.html_url
+            }
+        }),
+        code: 'SUCCESS',
+        message: `data recovered for user '${user}'`,
+    };
 }
 
 module.exports = {
