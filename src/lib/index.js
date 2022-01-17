@@ -3,7 +3,11 @@ const hash = require('object-hash');
 const { default: axios } = require('axios');
 
 async function cacheOf(bus, topic, event, expiry = 0, url = null) {
-    const key   = hash.sha1({ topic: topic, body: event?.body });
+    const body  = JSON.parse(event?.body);
+    if ( !(body instanceof Object)         ) { throw new TypeError('no body specified in event');           }
+    if ( typeof body?.user     != 'string' ) { throw new TypeError('no user specified in event body');      }
+
+    const key   = hash.sha1({ id: `${topic}|${body?.user}` });
     const cache = await bus.get(key);
     if ( cache ) {
         const cached = JSON.parse(cache);
@@ -47,8 +51,8 @@ async function merge(user, user_data, repo_data) {
             message: `data recovered for user '${user}'`,
         };
     } else {
-        if ( !user_data ) { throw new EvalError(`no user data recovered`); }
-        if ( !repo_data ) { throw new EvalError(`no repo data recovered`); }
+        if ( !user_data ) { throw new EvalError(`missing user data`); }
+        if ( !repo_data ) { throw new EvalError(`missing repo data`); }
     }
 }
 

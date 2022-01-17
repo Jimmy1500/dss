@@ -71,7 +71,7 @@ class App {
         }
         console.log('app %O stopped, last event id: %O', this.id_, this.last_id_);
     }
-    async work() {
+    async work(retries = 20) {
         const streams = await this.bus_.poll(this.topic_, this.last_id_, this.count_, this.block_);
 
         if ( !streams?.length ) { console.warn("topic %O drained", this.topic_); }
@@ -79,6 +79,9 @@ class App {
             for ( const [ topic, events ] of streams ) { // `topic` should equal to ${topic[i]}
                 let yes = true;
                 for ( const event of events ) {
+                    const retry_key = `retry.${topic}.${event.id}`;
+                    let retry = Number(await this.bus_.get(retry_key) || 0);
+
                     try {
                         console.log('# event %O.%O: %O', topic, event?.id, event?.body);
                         switch ( this.handler_.constructor.name ) {
@@ -98,7 +101,14 @@ class App {
                         }
                     } catch( error ) {
                         yes = false;
-                        console.error("%O.%O failed, %O", topic, event.id, error.stack);
+                        if ( ++retry >= retries ) {
+                            await this.bus_.free(topic, event.id);
+                            await this.bus_.del(retry_key);
+                            console.error("%O.%O freed, %O, retry %O of %O ", topic, event.id, error.message, retry, retries);
+                        } else {
+                            await this.bus_.set(retry_key, retry);
+                            console.error("%O.%O failed, %O, retry %O of %O", topic, event.id, error.message, retry, retries);
+                        }
                     }
                 } // for ( const event of events )
             }

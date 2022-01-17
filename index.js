@@ -1,5 +1,5 @@
 'use strict'
-const { cacheOf, merge, Bus, App, Cluster, Config } = require('./src');
+const { axios, cacheOf, merge, Bus, App, Cluster, Config } = require('./src');
 
 // const bus = new Bus();
 // bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ });
