@@ -4,8 +4,8 @@ const { axios, cacheOf, stash, merge, Bus, App, Cluster, Config } = require('./s
 // const bus = new Bus();
 // bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ });
 // bus.push(Config.REDIS.TOPIC.M3_DATA, { user: 'octocat', callback: 'http://localhost:5000/dev/callback' });
-// bus.push(Config.REDIS.TOPIC.M3_USER, { user: 'octocat' });
-// bus.push(Config.REDIS.TOPIC.M3_REPO, { user: 'octocat' });
+// bus.push(Config.REDIS.TOPIC.M3_USER, { user: 'octocat', callback: 'http://localhost:5000/dev/callback' });
+// bus.push(Config.REDIS.TOPIC.M3_REPO, { user: 'octocat', callback: 'http://localhost:5000/dev/callback' });
 // bus.poll([...Object.values(Config.REDIS.TOPIC)], [ 0, 0, 0 ], 10, 0).then(s  => { console.log('streams: %O', s); bus.flush(); });
 // bus.set('test_cache', ['a', 'b', 'c'], false).then(
 //     bus.get('test_cache', false).then( val => {
