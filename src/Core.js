@@ -8,7 +8,7 @@ function hashOf(topic, user) {
     return hash.sha1({ cache_id: `${topic}|${user}` });
 }
 
-async function cacheOf(bus, topic, user, expiry = 0, url = null) {
+async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null) {
     if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError('no expiry specified'); }
 
     const key = hashOf(topic, user);
@@ -27,11 +27,24 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null) {
     // refresh cache if source api url is specified
     if ( url?.length ) {
         try {
-            const res = await axios.get(url);
+            if ( rate_url?.length ) {
+                const usage = await axios.get(rate_url);
+                const rate  = usage?.data?.rate;
+                const limit       = rate?.limit     || 'N/A';
+                const remaining   = rate?.remaining || 0;
+                const reset       = rate?.reset     || 'N/A';
+                const used        = rate?.used      || 'N/A'
+
+                if ( !remaining ) { throw new EvalError(`api rate limit reached ${used} of ${limit}, resets in ${reset}s`); }
+                console.log(`(%O) api rate limit used %O of %O, %O left, resets in %Os`, usage.status, used, limit, remaining, reset);
+            }
+
+            const res   = await axios.get(url);
             await bus.set(key, { data: res?.data, expiry: Date.now() + expiry });
             console.log(`(%O) %O, cache %O updated for %O, expires in %Os`, res?.status, url, key, topic, expiry/1000);
             return res?.data;
         } catch ( error ) {
+            console.error('api failed', error.stack);
             const status  = error?.response?.status         || 400;
             const message = error?.response?.data?.message  || error.message;
             switch ( status ) {

@@ -25,14 +25,15 @@ async function handler(bus, topic, event, expiry) {
     if ( !body?.user?.length ) { throw new EvalError('no user specified in event.body'); }
     const user = body.user;
 
+    const rate_url = `${Config.GIT.API_BASE_URL}/rate_limit`;
     switch (topic) {
         case Config.REDIS.TOPIC.M3_DATA: {
             // get data from cache/source api
             let this_data = await cacheOf(bus, topic, user);
             if ( !this_data ) {
                 try {
-                    const this_user = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/users/${user}`);
-                    const this_repo = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, user, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/users/${user}/repos`);
+                    const this_user = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/users/${user}`,       rate_url);
+                    const this_repo = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, user, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/users/${user}/repos`, rate_url);
                     this_data       = await merge  (user, this_user, this_repo);
                 } catch ( error ) {
                     this_data       = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
@@ -58,11 +59,11 @@ async function handler(bus, topic, event, expiry) {
             break;
         }
         case Config.REDIS.TOPIC.M3_USER: {
-            await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/users/${user}`);
+            await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/users/${user}`,       rate_url);
             break;
         }
         case Config.REDIS.TOPIC.M3_REPO: {
-            await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/users/${user}/repos`);
+            await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/users/${user}/repos`, rate_url);
             break;
         }
         default: {

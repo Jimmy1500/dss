@@ -1,7 +1,7 @@
 'use strict'
 const uuid = require('uuid');
 const { Bus } = require('./Bus');
-const { ENV, REDIS, AWS, GIT } = require('./Env');
+const { REDIS } = require('./Env');
 
 const NETWORK_TYPE = {
     SHARED:  'SHARED',
