@@ -76,7 +76,7 @@ class App {
 
         if ( !streams?.length ) { console.warn("topic %O drained", this.topic_); }
         else {
-            for ( const [ topic, events ] of streams ) { // `topic_name` should equal to ${topic[i]}
+            for ( const [ topic, events ] of streams ) { // `topic` should equal to ${topic[i]}
                 let yes = true;
                 for ( const event of events ) {
                     try {
