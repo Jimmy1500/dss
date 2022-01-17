@@ -3,6 +3,10 @@ const uuid = require('uuid');
 const { Bus } = require('./Bus');
 const { REDIS } = require('./Env');
 
+function jsonOf(string) {
+    try { return JSON.parse(string); } catch (error) { return string; }
+}
+
 const NETWORK_TYPE = {
     SHARED:  'SHARED',
     PRIVATE: 'PRIVATE'
@@ -99,18 +103,19 @@ class App {
                         }
                     } catch( error ) {
                         yes = false;
-
                         const retry_key = `retry.${topic}.${event.id}`;
                         let retry = Number(await this.bus_.get(retry_key) || 0);
+
                         if ( ++retry >= retries ) {
+                            const body = jsonOf(event?.body);
+
+                            // event -> error event
                             await this.bus_.del (retry_key);
                             await this.bus_.free(topic, event.id);
-
-                            const body = JSON.parse(event?.body || {});
                             await this.bus_.push(topic, {
                                 error: {
                                     code:    'FAILURE',
-                                    message: `cannot handle request, retried ${retry} of ${retries} times`,
+                                    message: `cannot handle request, retried ${retry} of ${retries}`,
                                     request:  body
                                 },
                                 callback: body?.callback
