@@ -9,16 +9,16 @@ for var in "$@"; do
     if [ $var == "async" -o $var == "-a" ]; then
         mode="async";
     else
-        user="$var";
+        user="${var}";
     fi
 done
 
 function get_data() {
-    set -x
     local data="{ \"user\": \"${user}\", \"callback\": \"${base_url}/callback\" }"
     curl -X "${method}"                     \
         --url "${base_url}/data/${mode}"    \
         --data "${data}"
 }
 
-get_data $@
+# set -x
+get_data "$@"
