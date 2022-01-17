@@ -2,10 +2,14 @@
 const hash = require('object-hash');
 const { default: axios } = require('axios');
 
-async function cacheOf(bus, topic, user, expiry = 0, url = null) {
-    if ( !user?.length ) { throw new TypeError('no user specified in body'); }
+function hashOf(topic, user) {
+    if ( !topic?.length ) { throw new TypeError('no topic specified'); }
+    if ( !user?.length ) { throw new TypeError('no user specified'); }
+    return hash.sha1({ cache_id: `${topic}|${user}` });
+}
 
-    const key   = hash.sha1({ cache_id: `${topic}|${user}` });
+async function cacheOf(bus, topic, user, expiry = 0, url = null) {
+    const key = hashOf(topic, user);
     const cache = await bus.get(key);
     if ( cache ) {
         const cached = JSON.parse(cache);
@@ -42,6 +46,10 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null) {
     return null;
 }
 
+async function stash(bus, topic, user, data, expiry) {
+    await bus.set(hashOf(topic, user), { data: data, expiry: Date.now() + expiry });
+}
+
 async function merge(user, user_data, repo_data) {
     if ( typeof user != 'string' ) { throw new TypeError('username must be string'); }
     if ( user_data && repo_data ) {
@@ -71,6 +79,8 @@ async function merge(user, user_data, repo_data) {
 module.exports = {
     hash,
     axios,
+    hashOf,
     cacheOf,
+    stash,
     merge,
 }

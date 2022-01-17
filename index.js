@@ -1,5 +1,5 @@
 'use strict'
-const { axios, cacheOf, merge, Bus, App, Cluster, Config } = require('./src');
+const { axios, cacheOf, stash, merge, Bus, App, Cluster, Config } = require('./src');
 
 // const bus = new Bus();
 // bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ });
@@ -30,13 +30,17 @@ async function handler(bus, topic, event, expiry) {
             if ( !body?.callback?.length ) { throw new EvalError(`callback url not specified per ${topic}.${event.id}`); }
 
             // get data from cache/source api
-            let user_data, repo_data, data;
-            try {
-                user_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}`);
-                repo_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, user, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}/repos`);
-                data      = await merge  (user, user_data, repo_data);
-            } catch ( error ) {
-                data      = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
+            let data;
+            data = await cacheOf(bus, topic, user);
+            if ( !data ) {
+                try {
+                    const user_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}`);
+                    const repo_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, user, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/${user}/repos`);
+                    data            = await merge  (user, user_data, repo_data);
+                } catch ( error ) {
+                    data      = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
+                }
+                stash(bus, topic, user, data, expiry);
             }
 
             // send data via callback
