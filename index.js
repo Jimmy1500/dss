@@ -49,13 +49,11 @@ async function handler(bus, topic, event, expiry) {
             break;
         }
         case Config.REDIS.TOPIC.M3_USER: {
-            const data = await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/${user}`);
-            if ( !data ) { throw new EvalError(`${topic}.${event.id}: no data recovered for user '${user}'`); }
+            await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/${user}`);
             break;
         }
         case Config.REDIS.TOPIC.M3_REPO: {
-            const data = await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/${user}/repos`);
-            if ( !data ) { throw new EvalError(`${topic}.${event.id}: no data recovered for user '${user}'`); }
+            await cacheOf(bus, topic, user, expiry, `${Config.GIT.API_BASE_URL}/${user}/repos`);
             break;
         }
         default: {
