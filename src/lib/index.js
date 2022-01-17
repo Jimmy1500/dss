@@ -17,7 +17,7 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null) {
             await bus.del(key);
             console.warn(`cache %O purged for %O, no data or expiry specified`, key, topic);
         } else if ( cached.expiry > Date.now() ) {
-            console.warn(`cache %O valid for %O, expire in %Os`, key, topic, (cached.expiry - Date.now())/1000);
+            console.warn(`cache %O valid for %O, expires in %Os`, key, topic, (cached.expiry - Date.now())/1000);
             return cached?.data;
         } else { console.warn(`cache %O expired for %O`, key, topic); }
     } else { console.warn(`no cache %O exists for %O`, key, topic); }
@@ -27,7 +27,7 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null) {
         try {
             const res = await axios.get(url);
             await bus.set(key, { data: res?.data, expiry: Date.now() + expiry });
-            console.log(`(%O) %O, cache %O updated for %O, expire in %Os`, res?.status, url, key, topic, expiry/1000);
+            console.log(`(%O) %O, cache %O updated for %O, expires in %Os`, res?.status, url, key, topic, expiry/1000);
             return res?.data;
         } catch ( error ) {
             const { status, data } = error?.response;
