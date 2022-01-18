@@ -22,17 +22,17 @@ docker logs -f app
 
 ## How to Play
 ### Option 1: `curl`
-* health check
+* Health
 > if you got some response, then congratulations, your service is online!
 ```
 curl -X GET --url http://localhost:4000/dev/health
 ```
-* get data (sync)
+* Sync API
 > this will return data(or error) synchronously as the response of this call
 ```
 curl -X POST --url http://localhost:4000/dev/data/sync --data "{\"user\": \"octocat\"}"
 ```
-* get data (async)
+* Async API
 > this will return data(or error) asynchronously via callback url if specified in request, monitor sls & app logs to observe what happens
 ```
 curl -X POST --url http://localhost:4000/dev/data/async --data "{\"user\": \"octocat\", \"callback\": \"http://sls:4000/dev/callback\"}"
@@ -51,9 +51,15 @@ http://localhost:4000/dev
 ```
 | API                                                    | Method | URL           | Description           | Example Request                                                    |
 | :----------------------------------------------------: | :----: | :-----------: | :-------------------: | :---------------------------------------------------------------:  |
-| [health](http://localhost:4000/dev/health)             | GET    | /health       | health check          | `N/A`                                                              |
-| [get_data_sync](http://localhost:4000/dev/data/sync)   | POST   | /data/sync    | get data (sync mode)  | `{"user": "octocat"}`                                              |
-| [get_data_async](http://localhost:4000/dev/data/async) | POST   | /data/async   | get data (async mode) | `{"user": "octocat", "callback": "http://sls:4000/dev/callback" }` |
+| [Health](http://localhost:4000/dev/health)             | GET    | /health       | health check          | `N/A`                                                              |
+| [Sync API](http://localhost:4000/dev/data/sync)   | POST   | /data/sync    | get data (sync mode)  | `{"user": "octocat"}`                                              |
+| [Async API](http://localhost:4000/dev/data/async) | POST   | /data/async   | get data (async mode) | `{"user": "octocat", "callback": "http://sls:4000/dev/callback" }` |
+
+## Architecture
+### Diagram
+* [Application Flow](arch/app.png)
+### Description
+
 
 ## Development Instruction
 ### Container (Recommended)

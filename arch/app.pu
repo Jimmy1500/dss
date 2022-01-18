@@ -1,0 +1,55 @@
+@startuml app
+skinparam ComponentStyle uml1
+
+node User {
+    component Request
+}
+
+node AWS {
+    interface IngressGateway
+    interface Bus
+    node EKS {
+        component Cluster  
+        component App1
+        component App2
+        component App3
+    } 
+    node Serverless {
+        component Lambda
+        component Health
+        component SyncAPI
+        component AsyncAPI
+        component Callback
+    }
+    node ElasticCache {
+        database Redis {
+            component MemCache
+            component Streams
+        }
+    }
+}
+
+Request <-down-> IngressGateway
+Lambda  <-up-> IngressGateway 
+
+Lambda <-left->  Health
+Lambda <-down->  SyncAPI
+Lambda -down->   AsyncAPI
+Lambda <-down-   Callback
+
+Cluster -down->  App1
+Cluster -down->  App2
+Cluster -down->  App3
+
+SyncAPI  <-down--> Bus
+AsyncAPI -down-->  Bus
+Callback <--down-  Bus
+
+Bus     <--up->  App1
+Bus     <--up->  App2
+Bus     <--up->  App3
+
+Bus <-down-> Streams
+Bus <-down-> MemCache
+
+@enduml
