@@ -9,6 +9,7 @@ for var in "$@"; do
     if [ $var == "-a" -o $var == "--async"  ]; then
         mode="async";
     else
+        mode="sync";
         user="${var}";
     fi
 done
