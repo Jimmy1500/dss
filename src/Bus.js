@@ -81,7 +81,7 @@ class Bus {
         }
     }
 
-    /* cache */
+    /* caching */
     async set(key, val, literal = true) {
         if ( literal ) {
             if ( val instanceof Object || Array.isArray(val) ) { return await this.redis_.set(key, JSON.stringify(val)); }
