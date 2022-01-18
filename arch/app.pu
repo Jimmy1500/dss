@@ -41,13 +41,16 @@ Cluster -down->  App1
 Cluster -down->  App2
 Cluster -down->  App3
 
-SyncAPI  <-down--> Bus
-AsyncAPI -down-->  Bus
-Callback <--down-  Bus
+SyncAPI  <--down--> Bus
+AsyncAPI --down-->  Bus
 
-Bus     <--up->  App1
-Bus     <--up->  App2
-Bus     <--up->  App3
+Callback <-- App1
+Callback <-- App2
+Callback <-- App3
+
+Bus <--up->  App1
+Bus <--up->  App2
+Bus <--up->  App3
 
 Bus <-down-> Streams
 Bus <-down-> MemCache
