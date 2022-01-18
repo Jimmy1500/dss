@@ -105,6 +105,7 @@ This service has an active, single-threaded event driven mechanism that performs
 ## Development Instruction
 ### Container (Recommended)
 * prerequisite:
+    * vscode
     * docker
 * steps  
     * open vscode
