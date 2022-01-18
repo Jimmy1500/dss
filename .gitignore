@@ -50,8 +50,11 @@ node_modules
 jspm_packages
 build
 
-# Serverless directories
+# serverless directories
 .serverless
 
 # CSV
 *.csv
+
+# container
+.devcontainer
