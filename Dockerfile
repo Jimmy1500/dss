@@ -10,8 +10,7 @@ RUN npm install --global yarn && yarn global add node-gyp --prefix /usr/local
 
 # project
 WORKDIR ${LAMBDA_TASK_ROOT}
-COPY bin/get_data.sh bin/get_data.sh
-
+COPY bin bin
 COPY sls sls
 COPY src src
 COPY index.js index.js
