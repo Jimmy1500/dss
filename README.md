@@ -69,7 +69,7 @@ This service has an active, single-threaded event driven mechanism that performs
 * App Cluster:
     * hosts long running node application
     * cluster deploys and schedules app(s) via well defined interface
-    * each app handles event(s) from one or more topic(s), update and valid cache(s) per configurations, send data to callback if applicable
+    * each app handles event(s) from one or more topic(s), updates and validates cache(s) per configurations, then sends data to callback if applicable
 ### Design Emphasis
 * Event driven microservice cluster
 * Unified messaging & caching interface
