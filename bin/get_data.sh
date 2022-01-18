@@ -8,9 +8,13 @@ user="octocat"
 for var in "$@"; do
     if [ $var == "-a" -o $var == "--async"  ]; then
         mode="async";
-    else
+        continue;
+    elif [ $var == "-s" -o $var == "--sync"  ]; then
         mode="sync";
+        continue;
+    else
         user="${var}";
+        continue;
     fi
 done
 
