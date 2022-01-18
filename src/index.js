@@ -1,4 +1,4 @@
-const { hash, axios, jsonOf, hashOf, cacheOf, stash, merge } = require('./Core')
+const { hash, axios, jsonOf, hashOf, cacheOf, stash, merge } = require('./Lib')
 const { Bus } = require('./Bus');
 const { App, NETWORK_TYPE } = require('./App');
 const { Cluster, CLUSTER_STATUS } = require('./Cluster');

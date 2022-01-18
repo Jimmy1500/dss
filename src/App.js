@@ -2,7 +2,7 @@
 const uuid = require('uuid');
 const { Bus } = require('./Bus');
 const { REDIS } = require('./Env');
-const { jsonOf } = require('./Core');
+const { jsonOf } = require('./Lib');
 
 const NETWORK_TYPE = {
     SHARED:  'SHARED',
