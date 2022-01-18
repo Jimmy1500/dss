@@ -31,13 +31,13 @@ curl -X GET --url http://localhost:4000/dev/health
 * Sync API (getDataSync)
 > this returns data(or error) synchronously as the response of this call
 ```
-curl -X POST --url http://localhost:4000/dev/data/sync --data "{\"user\": \"octocat\"}"
+curl -X POST --url http://localhost:4000/dev/data/sync --data '{"user": "octocat"}'
 ```
 * Async API (getDataAsync)
 > this returns data(or error) asynchronously via callback url if specified in request,  
 > please monitor sls & app logs to observe what happens
 ```
-curl -X POST --url http://localhost:4000/dev/data/async --data "{\"user\": \"octocat\", \"callback\": \"http://sls:4000/dev/callback\"}"
+curl -X POST --url http://localhost:4000/dev/data/async --data '{"user": "octocat", "callback": "http://sls:4000/dev/callback"}'
 ```
 ### Option 2: `get_data.sh`
 > feeling lazy? got you covered!  
