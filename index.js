@@ -54,8 +54,8 @@ async function handler(bus, topic, event, expiry) {
             const res = await axios.post(url, this_data)
             console.log(`(%O) %O: %O`, res?.status, url, this_data);
         } catch ( error ) {
-            const status  = error?.response?.status         || 400;
-            const message = error?.response?.data?.message  || error.message;
+            const status  = error?.response?.status        || 400;
+            const message = error?.response?.data?.message || error.message;
             switch ( status ) {
                 case 403: console.error(`(${status}) callback ${url} forbidden, ${message}`); break;
                 case 404: console.error(`(${status}) callback ${url} offline, ${message}`); break;
