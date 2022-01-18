@@ -20,6 +20,6 @@ COPY serverless.yml serverless.yml
 RUN yarn add serverless nodemon --dev
 RUN yarn install --check-files
 
-# app-server
-ENTRYPOINT [ "yarn", "app" ]
+# sls-server
+ENTRYPOINT [ "yarn", "sls" ]
 # ENTRYPOINT [ "tail", "-f", "/dev/null" ]

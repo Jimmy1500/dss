@@ -1,12 +1,14 @@
-service: syngenta-api
+service: m3-api
 
 plugins:
   - serverless-localstack
   - serverless-offline
   - serverless-dotenv-plugin
+# - serverless-docker-artifacts
 
 custom:
   serverless-offline:
+    host: 0.0.0.0
     httpPort: 4000
   localstack:
     host: http://localhost # optional - LocalStack host to connect to

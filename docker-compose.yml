@@ -1,7 +1,7 @@
 version: '3.8'
 services:
 
-  app-server:
+  app:
     container_name: app
     image: app_img
     build:
@@ -10,8 +10,35 @@ services:
     depends_on:
       - redis
       - aws
-    # ports:
-    #   - "5000:5000"
+    links:
+      - sls
+    environment:
+      - NODE_ENV=LOCAL
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - AWS_REGION=us-east-1
+      - AWS_API_VERSION=2006-03-01
+      - AWS_S3_HOST=http://aws:4566
+      - AWS_S3_BUCKET=m3-api
+      - AWS_ACCESS_KEY_ID=FAKE
+      - AWS_SECRET_ACCESS_KEY=FAKE
+      - GIT_API_BASE_URL=https://api.github.com
+      - GIT_ACCESS_TOKEN=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
+    logging:
+      options:
+        max-size: 50m
+
+  sls:
+    container_name: sls
+    image: sls_img
+    build:
+      context: ./
+      dockerfile: sls.Dockerfile
+    depends_on:
+      - redis
+      - aws
+    ports:
+      - 4000:4000
     environment:
       - NODE_ENV=LOCAL
       - REDIS_HOST=redis
