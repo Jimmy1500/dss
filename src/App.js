@@ -104,8 +104,6 @@ class App {
                         let retry = Number(await this.bus_.get(retry_key) || 0);
 
                         if ( ++retry >= retries ) {
-                            const body = jsonOf(event?.body);
-
                             // event -> error event
                             await this.bus_.del (retry_key);
                             await this.bus_.free(topic, event.id);
@@ -113,7 +111,7 @@ class App {
                                 error: {
                                     code:    'FAILURE',
                                     message: `cannot handle request, retried ${retry} of ${retries}`,
-                                    body:    body
+                                    body:    jsonOf(event?.body)
                                 },
                             });
                             console.error("%O.%O freed, %O, retried %O of %O", topic, event.id, error.message, retry, retries);
