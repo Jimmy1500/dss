@@ -113,9 +113,8 @@ class App {
                                 error: {
                                     code:    'FAILURE',
                                     message: `cannot handle request, retried ${retry} of ${retries}`,
-                                    request:  body
+                                    body:    body
                                 },
-                                callback: body?.callback
                             });
                             console.error("%O.%O freed, %O, retried %O of %O", topic, event.id, error.message, retry, retries);
                         } else {
