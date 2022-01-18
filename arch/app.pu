@@ -5,8 +5,13 @@ node User {
     component Request
 }
 
+node GitHub{
+    component GitHubAPI
+}
+
 node AWS {
     interface IngressGateway
+    interface EgressGateway
     interface Bus
     node EKS {
         component Cluster  
@@ -32,10 +37,10 @@ node AWS {
 Request <-down-> IngressGateway
 Lambda  <-up-> IngressGateway 
 
-Lambda <-left->  Health
-Lambda <-down->  SyncAPI
-Lambda -down->   AsyncAPI
-Lambda <-down-   Callback
+Lambda <-left->   Health
+Lambda <--down--> SyncAPI
+Lambda --down-->  AsyncAPI
+Lambda <--down--  Callback
 
 Cluster -down->  App1
 Cluster -down->  App2
@@ -44,15 +49,20 @@ Cluster -down->  App3
 SyncAPI  <--down--> Bus
 AsyncAPI --down-->  Bus
 
-Callback <-- App1
-Callback <-- App2
-Callback <-- App3
+Callback <-down- App1
+Callback <-down- App2
+Callback <-down- App3
+
+EgressGateway <--up--> App1
+EgressGateway <--up--> App2
+EgressGateway <--up--> App3
+GitHubAPI <-left-> EgressGateway
 
 Bus <--up->  App1
 Bus <--up->  App2
 Bus <--up->  App3
 
-Bus <-down-> Streams
-Bus <-down-> MemCache
+Bus <--down--> Streams
+Bus <--down--> MemCache
 
 @enduml
