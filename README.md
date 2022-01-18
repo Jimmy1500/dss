@@ -1,6 +1,7 @@
 # Project M3
 
 ## How to Start
+### Container (Recommended)
 * prerequisite:
     * docker
     * docker-compose
