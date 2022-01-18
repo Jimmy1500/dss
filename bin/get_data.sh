@@ -31,7 +31,7 @@ is_user=false;
 is_req_url=false;
 is_res_url=false;
 
-if [ -z "$@" ]; then
+if [[ -z "$@" ]]; then
     display_help && exit 0;
 fi
 
