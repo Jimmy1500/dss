@@ -1,23 +1,60 @@
 # Project M3
 
-## How to Set Up
-* prerequisite:
-    * docker
-* steps
-    * (local) bring all containers [lambda, app, redis, s3] online
-    ```
-    ./bin/setup.sh
-    ```
-# How to Play
-* (Option 1) `bin/get_data.sh`
+## How to Start
+### Prerequisite:
+* docker
+* docker-compose
+* gawk
+### Steps
+1. spin up all containers [app, sls, redis, s3] online
+> peforms auto clean up, then calls `docker-compose up --build`
 ```
-./bin/get_data.sh --sync <username>
-./bin/get_data.sh --async <username>
+./bin/setup.sh
 ```
-* (Option 2) `curl`
+2. follow serverless logs (terminal panel 1)
 ```
-curl -X POST --url http://localhost:4000/dev/data/sync --data "{\"user\": \"octocat\"}
+docker logs -f sls
 ```
+3. follow app logs (terminal panel 2)
+```
+docker logs -f app
+```
+
+## How to Play
+### Option 1: `curl`
+* health check
+> if you got some response, then congratulations, your service is online!
+```
+curl -X GET --url http://localhost:4000/dev/health
+```
+* get data (sync)
+> this will return data(or error) synchronously as the response of this call
+```
+curl -X POST --url http://localhost:4000/dev/data/sync --data "{\"user\": \"octocat\"}"
+```
+* get data (async)
+> this will return data(or error) asynchronously via callback url if specified in request, monitor sls & app logs to observe what happens
+```
+curl -X POST --url http://localhost:4000/dev/data/async --data "{\"user\": \"octocat\", \"callback\": \"http://sls:4000/dev/callback\"}"
+```
+### Option 2: `get_data.sh`
+> Feeling lazy? Got you covered! use `bin/get_data.sh` instead to avoid typing/copy+paste headaches:
+```
+./bin/get_data.sh --help
+```
+
+## Service Endpoints
+### Serverless Functions
+* base url
+```
+http://localhost:4000/dev
+```
+| API                                                    | Method | URL           | Description           | Example Request                                                    |
+| :----------------------------------------------------: | :----: | :-----------: | :-------------------: | :---------------------------------------------------------------:  |
+| [health](http://localhost:4000/dev/health)             | GET    | /health       | health check          | `N/A`                                                              |
+| [get_data_sync](http://localhost:4000/dev/data/sync)   | POST   | /data/sync    | get data (sync mode)  | `{"user": "octocat"}`                                              |
+| [get_data_async](http://localhost:4000/dev/data/async) | POST   | /data/async   | get data (async mode) | `{"user": "octocat", "callback": "http://sls:4000/dev/callback" }` |
+
 ## Development Instruction
 ### Container (Recommended)
 * prerequisite:
@@ -29,15 +66,3 @@ curl -X POST --url http://localhost:4000/dev/data/sync --data "{\"user\": \"octo
     * nagivate to this project folder and confirm
     * work work work!
 * it might take a moment for the development container to be built(1st time only), so go pour youself a coffee or tea!
-
-## Service Endpoints
-### Serverless Functions
-* base url
-```
-http://localhost:4000/dev
-```
-| Endpoints                                              | Method | URL           | Example Request                             |
-| :----------------------------------------------------: | :----: | :-----------: | :-----------------------------------------: |
-| [health](http://localhost:4000/dev/health)             | GET    | /health       | `N/A`                                       |
-| [get_data_sync](http://localhost:4000/dev/data/sync)   | POST   | /data/sync    | `{"user": "octocat"}`                       |
-| [get_data_async](http://localhost:4000/dev/data/async) | POST   | /data/async   | `{"user": "octocat", "callback": "http://localhost:4000/dev/callback" }` |

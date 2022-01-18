@@ -13,7 +13,7 @@ Usage:
   $0 --async --user <user> --callback <url> : request data per <user>, response will be returned asynchronously via <url>
 
 Flags:
-  -h    || --help       : return this help message
+  -h    || --help       : display this help message
   -s    || --sync       : sync mode
   -a    || --async      : async mode
   -u    || --user       : specify user, default "octocat"
@@ -30,6 +30,10 @@ user="octocat"
 is_user=false;
 is_req_url=false;
 is_res_url=false;
+
+if [ -z "$@" ]; then
+    display_help && exit 0;
+fi
 
 for var in "$@"; do
     if [ $var == "-h" -o $var == "--help"  ]; then
