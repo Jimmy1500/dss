@@ -1,6 +1,6 @@
 'use strict'
-const hash = require('object-hash');
 const { default: axios } = require('axios');
+const hash = require('object-hash');
 
 function jsonOf(string) {
     try { return JSON.parse(string); } catch (error) { return string; }
@@ -103,8 +103,8 @@ async function merge(user, user_data, repo_data) {
 }
 
 module.exports = {
-    hash,
     axios,
+    hash,
     jsonOf,
     hashOf,
     cacheOf,
