@@ -1,5 +1,5 @@
 'use strict'
-const { axios, jsonOf, cacheOf, stash, merge, Bus, App, Cluster, Config } = require('./src');
+const { axios, jsonOf, cacheOf, stash, merge, Bus, App, Cluster, Config } = require('./src/lib');
 
 async function handler(bus, topic, event, expiry) {
     if ( !(bus instanceof Bus)      ) { throw new TypeError('bus must be instance of Bus');     }
