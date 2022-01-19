@@ -43,8 +43,10 @@ async function getDataSync(event){
 }
 
 async function getDataAsync(event){
+  const body = jsonOf(event.body);
+
   bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ })
-  await bus.push(Config.REDIS.TOPIC.M3_DATA, jsonOf(event.body));
+  await bus.push(Config.REDIS.TOPIC.M3_DATA, body);
   bus.disconnect();
 
   return {
@@ -60,6 +62,7 @@ async function callback(event){
   return {
     statusCode: 200,
     body: JSON.stringify({
+      code: 'SUCCESS',
       message: 'callback received!',
       req: jsonOf(event.body)
     },null, 2),
