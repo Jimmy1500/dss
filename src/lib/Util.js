@@ -79,7 +79,7 @@ async function stash(bus, topic, user, data, expiry = 0) {
 
 // merge user data and repo data into final output (view)
 async function merge(user, user_data, repo_data) {
-    if ( typeof user != 'string' ) { throw new TypeError('username must be string'); }
+    if ( typeof user != 'string' || !user?.length ) { throw new EvalError('no username specified'); }
     if ( !user_data ) { throw new EvalError(`missing user data`); }
     if ( !repo_data ) { throw new EvalError(`missing repo data`); }
 

@@ -16,17 +16,17 @@ async function health(event) {
 async function getDataSync(event){
   const body = jsonOf(event.body);
   const user = body.user;
-  const rate_url = `${Config.GIT.API_BASE_URL}/rate_limit`;
 
   bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ })
   let this_data = await cacheOf(bus, Config.REDIS.TOPIC.M3_DATA, user);
   if ( !this_data ) {
       try {
+          const rate_url  = `${Config.GIT.API_BASE_URL}/rate_limit`;
           const this_user = await cacheOf(bus, Config.REDIS.TOPIC.M3_USER, user, Config.CACHE.USER_EXPIRY, `${Config.GIT.API_BASE_URL}/users/${user}`,       rate_url);
           const this_repo = await cacheOf(bus, Config.REDIS.TOPIC.M3_REPO, user, Config.CACHE.REPO_EXPIRY, `${Config.GIT.API_BASE_URL}/users/${user}/repos`, rate_url);
           this_data       = await merge  (user, this_user, this_repo);
       } catch ( error ) {
-          this_data       = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}` };
+          this_data       = { code: 'FAILURE', message: `no data recovered for user '${user}', ${error.message}`, body: body };
       }
       stash(bus, Config.REDIS.TOPIC.M3_DATA, user, this_data, Config.CACHE.DATA_EXPIRY);
   }
@@ -43,10 +43,8 @@ async function getDataSync(event){
 }
 
 async function getDataAsync(event){
-  const body = jsonOf(event.body);
-
   bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ })
-  await bus.push(Config.REDIS.TOPIC.M3_DATA, body);
+  await bus.push(Config.REDIS.TOPIC.M3_DATA, jsonOf(event.body));
   bus.disconnect();
 
   return {
@@ -59,12 +57,11 @@ async function getDataAsync(event){
 }
 
 async function callback(event){
-  const body = jsonOf(event.body);
   return {
     statusCode: 200,
     body: JSON.stringify({
       message: 'callback received!',
-      req: body
+      req: jsonOf(event.body)
     },null, 2),
   };
 }
