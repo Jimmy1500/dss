@@ -22,8 +22,9 @@ bus.poll([...Object.values(Config.REDIS.TOPIC)], [ 0, 0, 0 ], 10, 0).then( strea
 bus.set('cache_key', ['a', 'b', 'c']).then(
     bus.get('cache_key').then( val => {
         console.log('cache retrieved: %O', val);
-        bus.del('cache_key');
-        console.log('cache deleted: %O', val);
-        bus.disconnect();
+        bus.del('cache_key').then( _ => {
+            console.log('cache deleted: %O', val);
+            bus.disconnect();
+        })
     })
 );
