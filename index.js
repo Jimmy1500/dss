@@ -3,8 +3,6 @@ const { Config, App, Cluster } = require('./src/lib');
 const { Reactor } = require('./src/app')
 
 function go(period = 10000) {
-    if ( period < 0 ) { throw new EvalError('period cannot be < 0'); }
-
     /* set up */
     const fleet = new Cluster(Config.NETWORK_TYPE.SHARED, Config.IDLE_STRATEGY, Config.FAILOVER_RETRY);
     const ships = [
@@ -22,11 +20,7 @@ function go(period = 10000) {
     fleet.deploy(ships);
 
     /* run */
-    console.log('running app cluster %O, shutdown in approx...%Os', fleet.id(), period ? period/1000: 'N/A');
-    fleet.go();
-
-    /* shutdown */
-    if ( period ) { fleet.wait(period).then( _ => fleet.halt()); }
+    fleet.go(period);
 }
 
 go(0);

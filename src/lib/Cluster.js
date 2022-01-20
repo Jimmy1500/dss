@@ -88,7 +88,13 @@ class Cluster {
         for ( const app of this.apps_ ) { await app.work(this.retries_); }
     }
 
-    async go() {
+    async go(period = 0) {
+        if ( typeof period != 'number' ) { throw new TypeError(`invalid period ${period}`); }
+        if ( period > 0 ) {
+            console.log('running cluster %O, stop in %Os', this.id_, period/1000);
+            this.wait(period).then( _ => this.halt());
+        } else            { console.log('running cluster %O, indefinitely', this.id_); }
+
         let next = true;
         do {
             try {
