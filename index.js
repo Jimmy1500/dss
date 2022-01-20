@@ -2,7 +2,7 @@
 const { Config, App, Cluster } = require('./src/lib');
 const { Reactor } = require('./src/app')
 
-function run(period = 10000) {
+function go(period = 10000) {
     if ( period < 0 ) { throw new EvalError('period cannot be < 0'); }
 
     /* set up */
@@ -29,4 +29,4 @@ function run(period = 10000) {
     if ( period ) { fleet.wait(period).then( _ => fleet.halt()); }
 }
 
-run(0);
+go(0);
