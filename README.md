@@ -31,12 +31,12 @@
 curl -X GET --url http://localhost:4000/dev/health
 ```
 * Sync API (getDataSync)
-> this returns data(or error) synchronously as the response of this call
+> this returns data (or error) synchronously as the response of this call
 ```
 curl -X POST --url http://localhost:4000/dev/data/sync --data '{"user": "octocat"}'
 ```
 * Async API (getDataAsync)
-> this returns data(or error) asynchronously via callback url if specified in request,  
+> this returns data (or error) asynchronously via callback url if specified in request,  
 > please monitor sls & app logs to observe what happens
 ```
 curl -X POST --url http://localhost:4000/dev/data/async --data '{"user": "octocat", "callback": "http://sls:4000/dev/callback"}'
@@ -65,11 +65,11 @@ http://localhost:4000/dev
 This service has an active, single-threaded event driven mechanism that performs:
 * cache validation per individual expiry configuration
 * data retrieval from source api
-* individual cache update per user data, repo data and merged data(user + repo)
+* individual cache update per user data, repo data and merged data (user + repo)
 ### Primary Components
 * [Diagram](arch/app.png)
 * Lambda:
-    * hosts stateless api endpoints(health, getDataSync, getDataAsync, callback), serves request(s) and emits event(s) to messaging
+    * hosts stateless api endpoints (health, getDataSync, getDataAsync, callback), serves request(s) and emits event(s) to messaging
 * App Cluster:
     * hosts long running node application
     * cluster deploys and schedules app(s) via well defined interface
@@ -86,9 +86,9 @@ This service has an active, single-threaded event driven mechanism that performs
     * cluster/app network sharing
     * ...
 ### Design Patterns
-* Scheduler (Cluster) -> Worker (App) -> Reactor (./index.handler)
+* Scheduler (Cluster) -> Worker (App) -> Reactor (Reactor)
 * Scheduler (Cluster) operates as finite-state machine 
-* Workers (App) act on event(s) per reactor implementation (./index.handler)
+* Worker(s) (App) act on event(s) per reactor (Reactor) implementation (user defined)
 ### System Intefaces
 * Cluster (Scheduler)
     * deploy(apps: App | App[])
@@ -99,7 +99,8 @@ This service has an active, single-threaded event driven mechanism that performs
     * start()
     * stop()
     * work()
-* Rector (Reactor)
+    * admit(reactor: Reactor)
+* Reactor (Reactor)
     * on(data: object)
 * Bus (Messaging)
     * push(topic: string, event: object | string | number | ...)
