@@ -4,7 +4,7 @@ const { cacheOf, stash, merge } = require('./Util');
 
 
 class Reactor {
-    constructor( bus = null ) {
+    constructor( bus ) {
         if ( !bus || !(bus instanceof Bus) ) { throw new EvalError(`invalid reactor network ${bus}`); }
         this.bus_ = bus;
         this.id_  = uuid.v4();
