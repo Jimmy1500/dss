@@ -39,7 +39,7 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null
                 console.log(`(%O) rate limit used %O of %O, %O left, resets in %Os`, usage.status, used, limit, remaining, reset);
             }
 
-            const res   = await axios.get(url);
+            const res = await axios.get(url);
             await bus.set(key, { data: res?.data, expiry: Date.now() + expiry });
             console.log(`(%O) %O, cache %O updated for %O, expires in %Os`, res?.status, url, key, topic, expiry/1000);
             return res?.data;
