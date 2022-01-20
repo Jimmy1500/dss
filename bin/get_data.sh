@@ -59,8 +59,8 @@ for var in "$@"; do
         is_res_url=false;
         continue;
     else
-        req_url="$var";
-        continue;
+        echo invalid input "${var}, please use --help to see usage patterns"
+        exit 1;
     fi
 done
 
