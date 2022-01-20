@@ -4,7 +4,7 @@ const { uuid, axios, jsonOf } = require('../lib')
 function hashOf(topic, user) {
     if ( !topic?.length ) { throw new TypeError('no topic specified'); }
     if ( !user?.length ) { throw new TypeError('no user specified'); }
-    return uuid.v5(`${topic}.${user}`, uuid.v5.URL);
+    return uuid.v5(`data.${topic}.${user}`, uuid.v5.URL);
 }
 
 // get valid cache, or get data from source api (refreshes cache) with rate limit check (optional)
