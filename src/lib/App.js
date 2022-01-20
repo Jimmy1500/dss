@@ -45,10 +45,10 @@ class App {
     }
 
     /* --------------- primary interface --------------- */
-    id() { return this.id_; }
-    network() { return this.bus_; }
-    admit(reactor) {
-        if ( typeof reactor?.on != 'function' ) { throw new EvalError(`invalid reactor ${reactor} interface, must implement on(data)`); }
+    id()            { return this.id_; }
+    network()       { return this.bus_; }
+    deploy(reactor) {
+        if ( typeof reactor?.on != 'function' ) { throw new EvalError(`invalid reactor, ${reactor?.on} interface, must implement on(data)`); }
         this.reactor_ = reactor;
     }
 
@@ -71,7 +71,8 @@ class App {
         console.log('app %O stopped, last event id: %O', this.id_, this.last_id_);
     }
     async work(retries = 1) {
-        if ( retries < 0 ) { throw new EvalError('no retries specified'); }
+        if ( !this.reactor_?.on ) { throw new EvalError(`invalid reactor, ${this.reactor_?.on} interface, must implement on(data)`); }
+        if ( retries < 0        ) { throw new EvalError(`invalid retries ${retries}`); }
 
         const streams = await this.bus_.poll(this.topic_, this.last_id_, this.count_, this.block_);
         if ( !streams?.length ) { console.warn("topic %O drained", this.topic_); }

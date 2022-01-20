@@ -31,7 +31,7 @@ class Cluster {
     network()     { return this.bus_; }
     report(status){ this.state_ = status; }
     shutdown()    { this.report(CLUSTER_STATUS.SHUTDOWN); }
-    admit(apps)  {
+    deploy(apps)  {
         switch(this.state_) {
             case CLUSTER_STATUS.IDLE:
                 if ( apps instanceof App ) { this.apps_.push(apps); }
