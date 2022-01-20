@@ -2,7 +2,7 @@
 const { Config, App, Cluster } = require('./src/lib');
 const { Reactor } = require('./src/app')
 
-function go(period = 10000) {
+async function go(period = 0) {
     /* set up */
     const fleet = new Cluster(Config.NETWORK_TYPE.SHARED, Config.IDLE_STRATEGY, Config.FAILOVER_RETRY);
     const ships = [
@@ -20,7 +20,7 @@ function go(period = 10000) {
     fleet.deploy(ships);
 
     /* run */
-    fleet.go(period);
+    await fleet.go(period);
 }
 
-go(0);
+go();

@@ -89,7 +89,7 @@ class Cluster {
     }
 
     async go(period = 0) {
-        if ( typeof period != 'number' ) { throw new TypeError(`invalid period ${period}`); }
+        if ( typeof period != 'number' || period < 0 ) { throw new EvalError(`invalid period ${period}`); }
         if ( period > 0 ) {
             console.log('running cluster %O, stop in %Os', this.id_, period/1000);
             this.wait(period).then( _ => this.halt());
