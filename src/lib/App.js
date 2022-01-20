@@ -1,7 +1,13 @@
 'use strict'
 const { NETWORK_TYPE, REDIS } = require('./Config');
-const { uuid, jsonOf } = require('./Util');
+const { uuid, jsonOf, hashOf } = require('./Util');
 const { Bus } = require('./Bus');
+
+function idOf(topic, event_id) {
+    if ( !topic?.length ) { throw new EvalError(`invalid topic ${topic}`); }
+    if ( !event_id?.length  ) { throw new EvalError(`invalid event_id ${event_id}`); }
+    return `retry.${topic}.${event_id}`
+}
 
 class App {
     constructor(
@@ -98,12 +104,15 @@ class App {
                         }
                     } catch( error ) {
                         yes = false;
-                        const retry_key = `retry.${topic}.${event.id}`;
-                        let retry = Number(await this.bus_.get(retry_key) || 0);
+                        const key = hashOf(idOf(topic, event?.id));
+                        let retry = Number(await this.bus_.get(key) || 0);
 
-                        if ( ++retry >= retries ) {
+                        if ( ++retry < retries ) {
+                            await this.bus_.set(key, retry);
+                            console.error("%O.%O failed, %O, retried %O of %O", topic, event.id, error.stack, retry, retries);
+                        } else {
                             // event -> error event
-                            await this.bus_.del (retry_key);
+                            await this.bus_.del (key);
                             await this.bus_.free(topic, event.id);
                             await this.bus_.push(topic, {
                                 error: {
@@ -113,9 +122,6 @@ class App {
                                 },
                             });
                             console.error("%O.%O freed, %O, retried %O of %O", topic, event.id, error.message, retry, retries);
-                        } else {
-                            await this.bus_.set(retry_key, retry);
-                            console.error("%O.%O failed, %O, retried %O of %O", topic, event.id, error.stack, retry, retries);
                         }
                     }
                 } // for ( const event of events )

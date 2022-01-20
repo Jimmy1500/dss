@@ -1,6 +1,6 @@
 'use strict'
 const Config = require('./Config');
-const { uuid, axios, jsonOf } = require('./Util')
+const { uuid, axios, jsonOf, hashOf } = require('./Util')
 const { Bus } = require('./Bus');
 const { App } = require('./App');
 const { Cluster } = require('./Cluster');
@@ -11,6 +11,7 @@ module.exports = {
     uuid,
     axios,
     jsonOf,
+    hashOf,
     Bus,
     App,
     Cluster

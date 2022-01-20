@@ -1,30 +1,30 @@
 'use strict'
-const { uuid, axios, jsonOf } = require('../lib')
+const { axios, jsonOf, hashOf } = require('../lib')
 
-function hashOf(topic, user) {
-    if ( !topic?.length ) { throw new TypeError('no topic specified'); }
-    if ( !user?.length ) { throw new TypeError('no user specified'); }
-    return uuid.v5(`data.${topic}.${user}`, uuid.v5.URL);
+function idOf(topic, user) {
+    if ( !topic?.length ) { throw new EvalError(`invalid topic ${topic}`); }
+    if ( !user?.length  ) { throw new EvalError(`invalid user ${user}`); }
+    return `data.${topic}.${user}`;
 }
 
-// get valid cache, or get data from source api (refreshes cache) with rate limit check (optional)
-async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null) {
+// get valid data, or get data from source api (refreshes data) with rate limit check (optional)
+async function dataOf(bus, topic, user, expiry = 0, url = null, rate_url = null) {
     if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError(`invalid expiry ${expiry}`); }
-
-    const key = hashOf(topic, user);
+    
+    const key = hashOf(idOf(topic, user));
     const val = await bus.get(key);
     if ( val ) {
         const value = jsonOf(val);
         if ( !value?.data || !value?.expiry ) {
             await bus.del(key);
-            console.warn(`cache %O purged for %O, no data or expiry specified`, key, topic);
+            console.warn(`data %O purged for %O, no data or expiry specified`, key, topic);
         } else if ( value.expiry > Date.now() ) {
-            console.warn(`cache %O valid for %O, expires in %Os`, key, topic, (value.expiry - Date.now())/1000);
+            console.warn(`data %O valid for %O, expires in %Os`, key, topic, (value.expiry - Date.now())/1000);
             return value?.data;
-        } else { console.warn(`cache %O expired for %O`, key, topic); }
-    } else { console.warn(`no cache %O exists for %O`, key, topic); }
+        } else { console.warn(`data %O expired for %O`, key, topic); }
+    } else { console.warn(`no data %O exists for %O`, key, topic); }
 
-    // refresh cache if source api url is specified
+    // refresh data if source api url is specified
     if ( url?.length ) {
         try {
             if ( rate_url?.length ) {
@@ -41,7 +41,7 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null
 
             const res = await axios.get(url);
             await bus.set(key, { data: res?.data, expiry: Date.now() + expiry });
-            console.log(`(%O) %O, cache %O updated for %O, expires in %Os`, res?.status, url, key, topic, expiry/1000);
+            console.log(`(%O) %O, data %O updated for %O, expires in %Os`, res?.status, url, key, topic, expiry/1000);
             return res?.data;
         } catch ( error ) {
             console.error('api failed', error.stack);
@@ -61,12 +61,12 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null
     return null;
 }
 
-// stash cache
+// stash data
 async function stash(bus, topic, user, data, expiry = 0) {
     if ( !data                                   ) { throw new EvalError(`invalid data ${data}`);     }
     if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError(`invalid expiry ${expiry}`); }
     if ( expiry ) {
-        const key = hashOf(topic, user);
+        const key = hashOf(idOf(topic, user));
         const val = { data: data, expiry: Date.now() + expiry };
         await bus.set(key, val);
     }
@@ -98,8 +98,7 @@ async function merge(user, user_data, repo_data) {
 }
 
 module.exports = {
-    hashOf,
-    cacheOf,
+    dataOf,
     stash,
     merge,
 }
