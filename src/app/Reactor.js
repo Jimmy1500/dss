@@ -1,6 +1,6 @@
 'use strict'
 const { Config, uuid, axios, jsonOf, Bus } = require('../lib');
-const { cacheOf, stash, merge } = require('./Belt');
+const { cacheOf, stash, merge } = require('./Tool');
 
 
 class Reactor {

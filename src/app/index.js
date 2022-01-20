@@ -1,5 +1,5 @@
 'use strict'
-const { cacheOf, stash, merge } = require('./Belt')
+const { cacheOf, stash, merge } = require('./Tool')
 const { Reactor } = require('./Reactor')
 
 module.exports = {
