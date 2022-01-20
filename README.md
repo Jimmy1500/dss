@@ -80,15 +80,15 @@ This service has an active, single-threaded event driven mechanism that performs
 * Infinite horizontal scalability
 * Efficient vertical scalability
 * Clean seperation of concerns (business logic vs. cross cutting framework logic)
-* Granular configurability (see src/index.Config)
+* Granular configurability (see src/lib/index.Config)
     * individual cache expiry
     * event(s) failover retry
     * cluster/app network sharing
     * ...
 ### Design Patterns
-* Scheduler (Cluster) -> Worker (App) -> Reactor (src/index.handler)
+* Scheduler (Cluster) -> Worker (App) -> Reactor (./index.handler)
 * Scheduler (Cluster) operates as finite-state machine 
-* Workers (App) act on event(s) per reactor implementation (src/index.handler)
+* Workers (App) act on event(s) per reactor implementation (./index.handler)
 ### System Intefaces
 * Cluster (Scheduler)
     * deploy(apps: App | App[])
