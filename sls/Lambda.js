@@ -1,5 +1,5 @@
 'use strict'
-const { jsonOf, Bus, Config } = require('../src/lib');
+const { Config, jsonOf, Bus } = require('../src/lib');
 const { cacheOf, stash, merge } = require('../src/app')
 
 const bus = new Bus();

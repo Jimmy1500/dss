@@ -1,5 +1,5 @@
 'use strict'
-const { App, Cluster, Config } = require('./src/lib');
+const { Config, App, Cluster } = require('./src/lib');
 const { Reactor } = require('./src/app')
 
 function run(duration = 10000) {

@@ -1,4 +1,4 @@
-const { Bus, Config } = require('../src/lib');
+const { Config, Bus } = require('../src/lib');
 
 const bus = new Bus();
 bus.connect({ port: Config.REDIS.PORT, host: Config.REDIS.HOST, db: 0, /* username: , password: */ });

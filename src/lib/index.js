@@ -7,12 +7,12 @@ const { Cluster } = require('./Cluster');
 
 
 module.exports = {
+    Config,
     uuid,
     hash,
     axios,
     jsonOf,
     Bus,
     App,
-    Cluster,
-    Config
+    Cluster
 }
