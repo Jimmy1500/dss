@@ -9,8 +9,8 @@ class Cluster {
         idle_ms = 0,
         retries = 1
     ) {
-        if ( typeof idle_ms != 'number' || idle_ms < 0 ) { throw new EvalError(`no idle_ms specified`); }
-        if ( typeof retries != 'number' || retries < 0 ) { throw new EvalError(`no retries specified`); }
+        if ( typeof idle_ms != 'number' || idle_ms < 0 ) { throw new EvalError(`invalid idle_ms ${idle_ms}`); }
+        if ( typeof retries != 'number' || retries < 0 ) { throw new EvalError(`invalid retries ${retries}`); }
 
         switch( network_type ) {
             case NETWORK_TYPE.SHARED:
