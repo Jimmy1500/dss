@@ -1,15 +1,7 @@
 'use strict'
 const { Bus } = require('./Bus')
-const { App, NETWORK_TYPE } = require('./App');
-const { REDIS } = require('./Env')
-
-const CLUSTER_STATUS =  {
-    IDLE:               'IDLE',
-    DEPLOYED:           'DEPLOYED',
-    STARTED:            'STARTED',
-    SHUTDOWN:           'SHUTDOWN',
-    STOPPED:            'STOPPED'
-}
+const { App } = require('./App');
+const { NETWORK_TYPE, CLUSTER_STATUS, REDIS } = require('./Config')
 
 class Cluster {
     constructor(
@@ -126,6 +118,5 @@ class Cluster {
 }
 
 module.exports = {
-    CLUSTER_STATUS,
     Cluster,
 }

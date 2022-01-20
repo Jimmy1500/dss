@@ -99,6 +99,8 @@ This service has an active, single-threaded event driven mechanism that performs
     * start()
     * stop()
     * work()
+* Rector (Reactor)
+    * on(data: object)
 * Bus (Messaging)
     * push(topic: string, event: object | string | number | ...)
     * poll(topic: string)

@@ -1,30 +1,25 @@
 'use strict'
 const uuid = require('uuid');
 const { Bus } = require('./Bus');
-const { REDIS } = require('./Env');
 const { jsonOf } = require('./Util');
-
-const NETWORK_TYPE = {
-    SHARED:  'SHARED',
-    PRIVATE: 'PRIVATE'
-}
+const { NETWORK_TYPE, REDIS } = require('./Config');
 
 class App {
     constructor(
         bus,
+        reactor,
         topic,
         last_id = 0,
         count   = 50,
         block   = 0,
         expiry  = 300000,
-        handler = async (bus, topic, event, expiry) => { console.warn("%O.%O handled, expiry %O", topic, event.id, expiry); }
     ) {
-        if ( typeof topic   != 'string' && !Array.isArray(topic)   ) { throw new EvalError(`invalid topic ${topic}`);     }
-        if ( typeof last_id != 'number' && !Array.isArray(last_id) ) { throw new EvalError(`invalid last_id ${last_id}`); }
-        if ( typeof count   != 'number' || count  <= 0             ) { throw new EvalError(`invalid count ${count}`);     }
-        if ( typeof block   != 'number' || block  < 0              ) { throw new EvalError(`invalid block ${block}`);     }
-        if ( typeof expiry  != 'number' || expiry < 0              ) { throw new EvalError(`invalid expiry ${expiry}`);   }
-        if ( typeof handler != 'function'                          ) { throw new TypeError(`invalid handler ${handler}`); }
+        if ( typeof topic       != 'string' && !Array.isArray(topic)   ) { throw new EvalError(`invalid topic ${topic}`);     }
+        if ( typeof last_id     != 'number' && !Array.isArray(last_id) ) { throw new EvalError(`invalid last_id ${last_id}`); }
+        if ( typeof count       != 'number'   || count  <= 0           ) { throw new EvalError(`invalid count ${count}`);     }
+        if ( typeof block       != 'number'   || block  < 0            ) { throw new EvalError(`invalid block ${block}`);     }
+        if ( typeof expiry      != 'number'   || expiry < 0            ) { throw new EvalError(`invalid expiry ${expiry}`);   }
+        if ( typeof reactor?.on != 'function'                          ) { throw new EvalError(`invalid reactor ${reactor}`); }
 
         if ( bus ) {
             if ( bus instanceof Bus ) {
@@ -36,6 +31,7 @@ class App {
             this.network_type_  = NETWORK_TYPE.PRIVATE;
         }
         
+        this.reactor_   = reactor;
         this.topic_     = topic;
         this.last_id_   = last_id;
         // align: topic vs. last_id
@@ -47,7 +43,6 @@ class App {
         this.count_     = count;
         this.block_     = block;
         this.expiry_    = expiry;
-        this.handler_   = handler;
         this.id_        = uuid.v4();
         console.log('app %O created, topic: %O, network type: %O', this.id_, this.topic_, this.network_type_);
     }
@@ -83,9 +78,9 @@ class App {
                 for ( const event of events ) { 
                     try {
                         console.log('# handling %O.%O: %O', topic, event?.id, event?.body);
-                        switch ( this.handler_.constructor.name ) {
-                            case 'AsyncFunction': await this.handler_(this.bus_, topic, event, this.expiry_); break;
-                            default:                    this.handler_(this.bus_, topic, event, this.expiry_); break;
+                        switch ( this.reactor_.on.constructor.name ) {
+                            case 'AsyncFunction': await this.reactor_.on({ topic: topic, event: event, expiry: this.expiry_ }); break;
+                            default:                    this.reactor_.on({ topic: topic, event: event, expiry: this.expiry_ }); break;
                         }
                         await this.bus_.free(topic, event.id);
 
@@ -127,6 +122,5 @@ class App {
 }
 
 module.exports = {
-    NETWORK_TYPE,
     App
 }

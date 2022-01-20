@@ -1,5 +1,26 @@
 'use strict'
 
+const NETWORK_TYPE = {
+    SHARED:  'SHARED',
+    PRIVATE: 'PRIVATE'
+}
+const CLUSTER_STATUS = {
+    IDLE:               'IDLE',
+    DEPLOYED:           'DEPLOYED',
+    STARTED:            'STARTED',
+    SHUTDOWN:           'SHUTDOWN',
+    STOPPED:            'STOPPED'
+}
+const FAILOVER_RETRY = 2
+const IDLE_STRATEGY  = 5
+const POLL_SIZE      = 50
+const BLOCK_ON_EMPTY = 500
+const CACHE = {
+    DATA_EXPIRY: 10000,
+    USER_EXPIRY: 600000,   
+    REPO_EXPIRY: 400000,
+}
+
 const LOCALE = process.env.NODE_ENV || 'LOCAL';
 
 const REDIS = { 
@@ -29,8 +50,15 @@ const GIT = {
 }
 
 module.exports = {
+    NETWORK_TYPE,
+    CLUSTER_STATUS,
+    FAILOVER_RETRY,
+    IDLE_STRATEGY,
+    POLL_SIZE,
+    BLOCK_ON_EMPTY,
+    CACHE,
     LOCALE,
     REDIS,
     AWS,
-    GIT,
+    GIT
 }
