@@ -15,8 +15,7 @@ class Reactor {
 
     /* --------------- primary interface --------------- */
     id() { return this.id_; }
-    async on( data ) {
-        const { topic = null, event = null, expiry = 0 } = data;
+    async on({ topic = null, event = null, expiry = 0 }) {
         if ( !topic?.length             ) { throw new EvalError(`invalid topic ${topic}`);     }
         if ( !(event instanceof Object) ) { throw new EvalError(`invalid event ${event}`);     }
         if ( !event?.body?.length       ) { throw new EvalError(`invalid event.body ${body}`); }
