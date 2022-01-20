@@ -69,7 +69,7 @@ This service has an active, single-threaded event driven mechanism that performs
 ### Primary Components
 * [Diagram](arch/app.png)
 * Lambda:
-    * hosts stateless api endpoints(health, getDataSync, getDataAsync, callback), serves request(s) and emit event(s) to messaging
+    * hosts stateless api endpoints(health, getDataSync, getDataAsync, callback), serves request(s) and emits event(s) to messaging
 * App Cluster:
     * hosts long running node application
     * cluster deploys and schedules app(s) via well defined interface
