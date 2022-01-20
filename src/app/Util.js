@@ -4,14 +4,14 @@ const { axios, jsonOf, hashOf } = require('../lib')
 function idOf(topic, user) {
     if ( !topic?.length ) { throw new EvalError(`invalid topic ${topic}`); }
     if ( !user?.length  ) { throw new EvalError(`invalid user ${user}`); }
-    return `data.${topic}.${user}`;
+    return hashOf(`data.${topic}.${user}`);
 }
 
 // get valid data, or get data from source api (refreshes data) with rate limit check (optional)
 async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null) {
     if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError(`invalid expiry ${expiry}`); }
     
-    const key = hashOf(idOf(topic, user));
+    const key = idOf(topic, user);
     const val = await bus.get(key);
     if ( val ) {
         const value = jsonOf(val);
@@ -66,7 +66,7 @@ async function stash(bus, topic, user, data, expiry = 0) {
     if ( !data                                   ) { throw new EvalError(`invalid data ${data}`);     }
     if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError(`invalid expiry ${expiry}`); }
     if ( expiry ) {
-        const key = hashOf(idOf(topic, user));
+        const key = idOf(topic, user);
         const val = { data: data, expiry: Date.now() + expiry };
         await bus.set(key, val);
     }

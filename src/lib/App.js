@@ -6,7 +6,7 @@ const { Bus } = require('./Bus');
 function idOf(topic, event_id) {
     if ( !topic?.length ) { throw new EvalError(`invalid topic ${topic}`); }
     if ( !event_id?.length  ) { throw new EvalError(`invalid event_id ${event_id}`); }
-    return `retry.${topic}.${event_id}`
+    return hashOf(`retry.${topic}.${event_id}`);
 }
 
 class App {
@@ -104,7 +104,7 @@ class App {
                         }
                     } catch( error ) {
                         yes = false;
-                        const key = hashOf(idOf(topic, event?.id));
+                        const key = idOf(topic, event?.id);
                         let retry = Number(await this.bus_.get(key) || 0);
 
                         if ( ++retry < retries ) {
