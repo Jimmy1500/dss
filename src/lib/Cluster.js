@@ -1,5 +1,6 @@
 'use strict'
 const { NETWORK_TYPE, CLUSTER_STATUS, REDIS } = require('./Config')
+const { uuid } = require('./Util');
 const { Bus } = require('./Bus')
 const { App } = require('./App');
 
@@ -24,13 +25,15 @@ class Cluster {
         this.state_     = CLUSTER_STATUS.IDLE;
         this.idle_      = idle_ms;
         this.retries_   = retries;
-        console.log('cluster created, idle_strategy: %O ms', this.idle_);
+        this.id_        = uuid.v4();
+        console.log('cluster %O created, idle_strategy: %O ms', this.id_, this.idle_);
     }
 
     /* --------------- primary interface --------------- */
+    id()          { return this.id_; }
     network()     { return this.bus_; }
     report(status){ this.state_ = status; }
-    shutdown()    { this.report(CLUSTER_STATUS.SHUTDOWN); }
+    halt()        { this.report(CLUSTER_STATUS.HALTED); }
     deploy(apps)  {
         switch(this.state_) {
             case CLUSTER_STATUS.IDLE:
@@ -68,10 +71,10 @@ class Cluster {
     }
 
     async stop() {
-        console.log(`cluster shutting down...`);
+        console.log(`cluster stopping...`);
         switch(this.state_) {
             case CLUSTER_STATUS.STARTED:
-            case CLUSTER_STATUS.SHUTDOWN:
+            case CLUSTER_STATUS.HALTED:
                 for ( const app of this.apps_ ) { await app.stop(); }
                 if ( this.bus_ ) { this.bus_.disconnect(); }
                 this.report(CLUSTER_STATUS.STOPPED);
@@ -85,7 +88,7 @@ class Cluster {
         for ( const app of this.apps_ ) { await app.work(this.retries_); }
     }
 
-    async run() {
+    async go() {
         let next = true;
         do {
             try {
@@ -96,7 +99,7 @@ class Cluster {
                     case CLUSTER_STATUS.STARTED:
                         await this.work();
                         break;
-                    case CLUSTER_STATUS.SHUTDOWN:
+                    case CLUSTER_STATUS.HALTED:
                         await this.stop();
                         break;
                     case CLUSTER_STATUS.STOPPED:

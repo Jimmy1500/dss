@@ -8,7 +8,7 @@ const CLUSTER_STATUS = {
     IDLE:               'IDLE',
     DEPLOYED:           'DEPLOYED',
     STARTED:            'STARTED',
-    SHUTDOWN:           'SHUTDOWN',
+    HALTED:             'HALTED',
     STOPPED:            'STOPPED'
 }
 const FAILOVER_RETRY = 2
