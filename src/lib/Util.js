@@ -14,7 +14,7 @@ function hashOf(topic, user) {
 
 // get valid cache, or get data from source api (refreshes cache) with rate limit check (optional)
 async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null) {
-    if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError('no expiry specified'); }
+    if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError(`invalid expiry ${expiry}`); }
 
     const key = hashOf(topic, user);
     const val = await bus.get(key);
@@ -35,10 +35,10 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null
             if ( rate_url?.length ) {
                 const usage     = await axios.get(rate_url);
                 const rate      = usage?.data?.rate;
-                const limit     = rate?.limit     || 'N/A';
-                const remaining = rate?.remaining || 0;
-                const reset     = rate?.reset     || 'N/A';
-                const used      = rate?.used      || 'N/A'
+                const limit     = rate?.limit     ?? 'N/A';
+                const remaining = rate?.remaining ?? 0;
+                const reset     = rate?.reset     ?? 'N/A';
+                const used      = rate?.used      ?? 'N/A'
 
                 if ( !remaining ) { throw new EvalError(`rate limit reached ${used} of ${limit}, resets in ${reset}s`); }
                 console.log(`(%O) rate limit used %O of %O, %O left, resets in %Os`, usage.status, used, limit, remaining, reset);
@@ -51,7 +51,7 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null
         } catch ( error ) {
             console.error('api failed', error.stack);
             const status  = error?.response?.status         || 400;
-            const message = error?.response?.data?.message  || error.message;
+            const message = error?.response?.data?.message  || error?.message;
             switch ( status ) {
                 case 403: throw new EvalError(`(${status}) api forbidden, ${message}`);
                 case 404:
@@ -59,7 +59,7 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null
                         case 'Not Found': throw new EvalError(`(${status}) user '${user}' not found`);
                         default:          throw new EvalError(`(${status}) api offline, ${message}`);
                     }
-                default: throw new EvalError(`(${status}) api failed, ${message}`);
+                default:                  throw new EvalError(`(${status}) api failed, ${message}`);
             }
         }
     }

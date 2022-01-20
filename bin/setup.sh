@@ -2,7 +2,7 @@
 
 arch=`uname -s`_`uname -m`
 echo "Machine architecture detected: $arch"
-windows_warning_msg="Don't be so naughty and stop using Windows, switch you OS and come back again"
+windows_warning_msg="Don't be so naughty and stop using Windows, switch your OS and come back again"
 
 # sanity check
 if [[ `which docker` ]]; then

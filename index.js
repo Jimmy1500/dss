@@ -55,7 +55,7 @@ async function handler(bus, topic, event, expiry) {
             console.log(`(%O) %O: %O`, res?.status, url, this_data);
         } catch ( error ) {
             const status  = error?.response?.status        || 400;
-            const message = error?.response?.data?.message || error.message;
+            const message = error?.response?.data?.message || error?.message;
             switch ( status ) {
                 case 403: throw new EvalError(`(${status}) callback ${url} forbidden, ${message}`);
                 case 404: throw new EvalError(`(${status}) callback ${url} offline, ${message}`);
