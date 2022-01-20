@@ -8,7 +8,7 @@ function idOf(topic, user) {
 }
 
 // get valid data, or get data from source api (refreshes data) with rate limit check (optional)
-async function dataOf(bus, topic, user, expiry = 0, url = null, rate_url = null) {
+async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null) {
     if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError(`invalid expiry ${expiry}`); }
     
     const key = hashOf(idOf(topic, user));
@@ -98,7 +98,7 @@ async function merge(user, user_data, repo_data) {
 }
 
 module.exports = {
-    dataOf,
+    cacheOf,
     stash,
     merge,
 }
