@@ -9,7 +9,7 @@
     * grep
     * gawk
 * steps
-    * spin up all containers [app, sls, redis, s3] online
+    * spin up all containers [sls, app, redis, s3] online
     > peforms auto clean up, then calls `docker-compose up --build`
     ```
     ./bin/setup.sh
