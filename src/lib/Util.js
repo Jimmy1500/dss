@@ -68,8 +68,8 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null
 
 // stash cache
 async function stash(bus, topic, user, data, expiry = 0) {
-    if ( !data ) { throw new EvalError('no data specified'); }
-    if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError('no expiry specified'); }
+    if ( !data                                   ) { throw new EvalError(`invalid data ${data}`);     }
+    if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError(`invalid expiry ${expiry}`); }
     if ( expiry ) {
         const key = hashOf(topic, user);
         const val = { data: data, expiry: Date.now() + expiry };
