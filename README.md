@@ -89,7 +89,10 @@ This service has an active, single-threaded event driven mechanism that performs
 * Scheduler (Cluster) -> Worker (App) -> Reactor (Reactor)
 * Scheduler (Cluster) operates as finite-state machine 
 * Worker(s) (App) act on event(s) per reactor (Reactor) implementation (user defined)
-### System Intefaces
+### User Interfaces
+* Reactor (Reactor)
+    * on(data: object)
+### Framework Intefaces
 * Cluster (Scheduler)
     * deploy(apps: App | App[])
     * start()
@@ -100,8 +103,6 @@ This service has an active, single-threaded event driven mechanism that performs
     * start()
     * stop()
     * work()
-* Reactor (Reactor)
-    * on(data: object)
 * Bus (Messaging)
     * push(topic: string, event: object | string | number | ...)
     * poll(topic: string)
