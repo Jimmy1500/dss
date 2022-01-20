@@ -1,5 +1,5 @@
 'use strict'
-const { uuid, axios, jsonOf, Bus, Config } = require('../lib');
+const { Config, uuid, axios, jsonOf, Bus } = require('../lib');
 const { cacheOf, stash, merge } = require('./Util');
 
 
