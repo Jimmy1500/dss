@@ -80,7 +80,7 @@ This service has an active, single-threaded event driven mechanism that performs
 * Infinite horizontal scalability
 * Efficient vertical scalability
 * Clean seperation of concerns (business logic vs. cross cutting framework logic)
-* Granular configurability (see src/lib/index.Config)
+* Granular configurability (see src/lib/Config)
     * individual cache expiry
     * event(s) failover retry
     * cluster/app network sharing
@@ -99,7 +99,7 @@ This service has an active, single-threaded event driven mechanism that performs
     * stop()
     * work()
 * App (Worker)
-    * deploy(reactor: Reactor)
+    * wire(reactor: Reactor)
     * start()
     * stop()
     * work()

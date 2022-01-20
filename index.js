@@ -14,7 +14,7 @@ function run(duration = 10000) {
     ]
 
     /* deploy */
-    for ( const app of apps ) { app.deploy(new Reactor( cluster.network() || app.network() )); }
+    for ( const app of apps ) { app.wire(new Reactor( cluster.network() || app.network() )); }
     cluster.deploy(apps);
 
     /* run */

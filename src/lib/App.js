@@ -44,9 +44,9 @@ class App {
     }
 
     /* --------------- primary interface --------------- */
-    id()            { return this.id_; }
-    network()       { return this.bus_; }
-    deploy(reactor) {
+    id()          { return this.id_; }
+    network()     { return this.bus_; }
+    wire(reactor) {
         if ( typeof reactor?.on != 'function' ) { throw new EvalError(`invalid reactor, ${reactor?.on} interface, must implement on(data)`); }
         this.reactor_ = reactor;
     }
