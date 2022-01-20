@@ -1,8 +1,6 @@
 'use strict'
-const uuid = require('uuid');
-const { Bus } = require('./lib/Bus');
-const { axios, jsonOf, cacheOf, stash, merge } = require('./lib/Util');
-const Config = require('./lib/Config')
+const { uuid, axios, jsonOf, Bus, Config } = require('../lib');
+const { cacheOf, stash, merge } = require('./Util');
 
 
 class Reactor {
@@ -15,6 +13,7 @@ class Reactor {
 
     /* --------------- primary interface --------------- */
     id() { return this.id_; }
+
     async on({ topic = null, event = null, expiry = 0 }) {
         if ( !topic?.length             ) { throw new EvalError(`invalid topic ${topic}`);     }
         if ( !(event instanceof Object) ) { throw new EvalError(`invalid event ${event}`);     }

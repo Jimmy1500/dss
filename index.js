@@ -1,6 +1,6 @@
 'use strict'
 const { App, Cluster, Config } = require('./src/lib');
-const { Reactor } = require('./src/Reactor')
+const { Reactor } = require('./src/app')
 
 function run(duration = 10000) {
     if ( duration < 0 ) { throw new EvalError('duration cannot be < 0'); }
