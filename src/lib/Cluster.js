@@ -1,7 +1,7 @@
 'use strict'
+const { NETWORK_TYPE, CLUSTER_STATUS, REDIS } = require('./Config')
 const { Bus } = require('./Bus')
 const { App } = require('./App');
-const { NETWORK_TYPE, CLUSTER_STATUS, REDIS } = require('./Config')
 
 class Cluster {
     constructor(

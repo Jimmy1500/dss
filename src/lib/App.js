@@ -1,7 +1,7 @@
 'use strict'
-const { Bus } = require('./Bus');
-const { uuid, jsonOf } = require('./Util');
 const { NETWORK_TYPE, REDIS } = require('./Config');
+const { uuid, jsonOf } = require('./Util');
+const { Bus } = require('./Bus');
 
 class App {
     constructor(
