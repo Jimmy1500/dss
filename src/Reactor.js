@@ -6,7 +6,7 @@ const Config = require('./lib/Config')
 
 
 class Reactor {
-    constructor( bus ) {
+    constructor( bus = null ) {
         if ( !bus || !(bus instanceof Bus) ) { throw new EvalError(`invalid reactor network ${bus}`); }
         this.bus_ = bus;
         this.id_  = uuid.v4();
@@ -17,7 +17,7 @@ class Reactor {
     id() { return this.id_; }
     async on( data ) {
         const { topic = null, event = null, expiry = 0 } = data;
-        if ( !topic?.length )             { throw new EvalError(`invalid topic ${topic}`);     }
+        if ( !topic?.length             ) { throw new EvalError(`invalid topic ${topic}`);     }
         if ( !(event instanceof Object) ) { throw new EvalError(`invalid event ${event}`);     }
         if ( !event?.body?.length       ) { throw new EvalError(`invalid event.body ${body}`); }
 

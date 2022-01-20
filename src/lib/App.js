@@ -7,31 +7,28 @@ const { NETWORK_TYPE, REDIS } = require('./Config');
 class App {
     constructor(
         bus,
-        reactor,
         topic,
         last_id = 0,
         count   = 50,
         block   = 0,
         expiry  = 300000,
     ) {
-        if ( typeof topic       != 'string' && !Array.isArray(topic)   ) { throw new EvalError(`invalid topic ${topic}`);     }
-        if ( typeof last_id     != 'number' && !Array.isArray(last_id) ) { throw new EvalError(`invalid last_id ${last_id}`); }
-        if ( typeof count       != 'number'   || count  <= 0           ) { throw new EvalError(`invalid count ${count}`);     }
-        if ( typeof block       != 'number'   || block  < 0            ) { throw new EvalError(`invalid block ${block}`);     }
-        if ( typeof expiry      != 'number'   || expiry < 0            ) { throw new EvalError(`invalid expiry ${expiry}`);   }
-        if ( typeof reactor?.on != 'function'                          ) { throw new EvalError(`invalid reactor ${reactor}`); }
+        if ( typeof topic    != 'string' && !Array.isArray(topic)   ) { throw new EvalError(`invalid topic ${topic}`);     }
+        if ( typeof last_id  != 'number' && !Array.isArray(last_id) ) { throw new EvalError(`invalid last_id ${last_id}`); }
+        if ( typeof count    != 'number'   || count  <= 0           ) { throw new EvalError(`invalid count ${count}`);     }
+        if ( typeof block    != 'number'   || block  < 0            ) { throw new EvalError(`invalid block ${block}`);     }
+        if ( typeof expiry   != 'number'   || expiry < 0            ) { throw new EvalError(`invalid expiry ${expiry}`);   }
 
-        if ( bus ) {
-            if ( bus instanceof Bus ) {
-                this.bus_           = bus;
-                this.network_type_  = NETWORK_TYPE.SHARED;
-            } else { throw new TypeError('bus must be instance of Bus'); }
+        if ( !bus ) {
+            this.bus_          = new Bus();
+            this.network_type_ = NETWORK_TYPE.PRIVATE;
+        } else if ( bus instanceof Bus ) {
+            this.bus_          = bus;
+            this.network_type_ = NETWORK_TYPE.SHARED;
         } else {
-            this.bus_           = new Bus();
-            this.network_type_  = NETWORK_TYPE.PRIVATE;
+            throw new TypeError('bus must be instance of Bus');
         }
         
-        this.reactor_   = reactor;
         this.topic_     = topic;
         this.last_id_   = last_id;
         // align: topic vs. last_id
@@ -49,6 +46,12 @@ class App {
 
     /* --------------- primary interface --------------- */
     id() { return this.id_; }
+    network() { return this.bus_; }
+    admit(reactor) {
+        if ( typeof reactor?.on != 'function' ) { throw new EvalError(`invalid reactor ${reactor} interface, must implement on(data)`); }
+        this.reactor_ = reactor;
+    }
+
     async start() {
         switch (this.network_type_) {
             case NETWORK_TYPE.PRIVATE:
