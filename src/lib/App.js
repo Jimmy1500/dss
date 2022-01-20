@@ -5,8 +5,8 @@ const { Bus } = require('./Bus');
 
 class App {
     constructor(
-        bus,
-        topic,
+        bus     = null,
+        topic   = null,
         last_id = 0,
         count   = 50,
         block   = 0,
