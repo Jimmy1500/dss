@@ -19,12 +19,12 @@ class App {
         expiry  = 300000,
         handler = async (bus, topic, event, expiry) => { console.warn("%O.%O handled, expiry %O", topic, event.id, expiry); }
     ) {
-        if ( typeof topic   != 'string' && !Array.isArray(topic)   ) { throw new TypeError(`invalid topic type ${typeof topic}`);     }
-        if ( typeof last_id != 'number' && !Array.isArray(last_id) ) { throw new TypeError(`invalid last_id type ${typeof last_id}`); }
-        if ( typeof count   != 'number'   ) { throw new TypeError(`invalid count type ${typeof count}`);     }
-        if ( typeof block   != 'number'   ) { throw new TypeError(`invalid block type ${typeof block}`);     }
-        if ( typeof expiry  != 'number'   ) { throw new TypeError(`invalid expiry type ${typeof expiry}`);     }
-        if ( typeof handler != 'function' ) { throw new TypeError(`invalid handler type ${typeof handler}`); }
+        if ( typeof topic   != 'string' && !Array.isArray(topic)   ) { throw new EvalError(`invalid topic ${topic}`);     }
+        if ( typeof last_id != 'number' && !Array.isArray(last_id) ) { throw new EvalError(`invalid last_id ${last_id}`); }
+        if ( typeof count   != 'number' || count  <= 0             ) { throw new EvalError(`invalid count ${count}`);     }
+        if ( typeof block   != 'number' || block  < 0              ) { throw new EvalError(`invalid block ${block}`);     }
+        if ( typeof expiry  != 'number' || expiry < 0              ) { throw new EvalError(`invalid expiry ${expiry}`);   }
+        if ( typeof handler != 'function'                          ) { throw new TypeError(`invalid handler ${handler}`); }
 
         if ( bus ) {
             if ( bus instanceof Bus ) {
@@ -46,7 +46,7 @@ class App {
         } else if ( Array.isArray(last_id) ) { this.last_id_ = 0; }
         this.count_     = count;
         this.block_     = block;
-        this.expiry_    = expiry > 0 ? expiry : 300000;
+        this.expiry_    = expiry;
         this.handler_   = handler;
         this.id_        = uuid.v4();
         console.log('app %O created, topic: %O, network type: %O', this.id_, this.topic_, this.network_type_);
