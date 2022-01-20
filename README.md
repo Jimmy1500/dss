@@ -5,6 +5,8 @@
 * prerequisite:
     * docker
     * docker-compose
+    * aws
+    * grep
     * gawk
 * steps
     * spin up all containers [app, sls, redis, s3] online
