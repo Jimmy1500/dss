@@ -11,15 +11,20 @@ const CLUSTER_STATUS = {
     HALTED:             'HALTED',
     STOPPED:            'STOPPED'
 }
-const FAILOVER_RETRY = 2
-const IDLE_STRATEGY  = 5
-const POLL_SIZE      = 50
-const BLOCK_ON_EMPTY = 500
+const IDLE = {
+    STRATEGY: 5
+}
+const RETRY = {
+    STRATEGY: 2
+}
+const POLL_SIZE     = 50
+const BLOCK_PERIOD  = 500
 const CACHE = {
     DATA_EXPIRY: 10000,
     USER_EXPIRY: 600000,   
     REPO_EXPIRY: 400000,
 }
+
 
 const LOCALE = process.env.NODE_ENV || 'LOCAL';
 
@@ -52,10 +57,10 @@ const GIT = {
 module.exports = {
     NETWORK_TYPE,
     CLUSTER_STATUS,
-    FAILOVER_RETRY,
-    IDLE_STRATEGY,
+    IDLE,
+    RETRY,
     POLL_SIZE,
-    BLOCK_ON_EMPTY,
+    BLOCK_PERIOD,
     CACHE,
     LOCALE,
     REDIS,
