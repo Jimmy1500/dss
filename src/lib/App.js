@@ -88,7 +88,6 @@ class App {
                 let yes = true;
                 for ( const event of events ) { 
                     try {
-                        console.log('# handling %O.%O: %O', topic, event?.id, event?.body);
                         switch ( this.reactor_.on.constructor.name ) {
                             case 'AsyncFunction': await this.reactor_.on({ topic: topic, event: event, expiry: this.expiry_ }); break;
                             default:                    this.reactor_.on({ topic: topic, event: event, expiry: this.expiry_ }); break;
