@@ -37,13 +37,7 @@ class App {
         }
         
         this.topic_     = topic;
-        this.last_id_   = last_id;
-        // align: topic vs. last_id
-        if ( Array.isArray(topic) ) {
-            if ( !Array.isArray(last_id) || topic.length != last_id.length ) {
-                this.last_id_ = Array(topic.length).fill(0);
-            }
-        } else if ( Array.isArray(last_id) ) { this.last_id_ = 0; }
+        this.last_id_   = topic?.length === last_id?.length ? last_id : ( Array.isArray(topic) ? Array(topic?.length).fill(0) : 0 );
         this.count_     = count;
         this.block_     = block;
         this.expiry_    = expiry;
