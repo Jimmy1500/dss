@@ -44,7 +44,7 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null
             console.log(`(%O) %O, data %O updated for %O, expires in %Os`, res?.status, url, key, topic, expiry/1000);
             return res?.data;
         } catch ( error ) {
-            console.error('api failed', error.stack);
+            console.error('api failed, %O', error.stack);
             const status  = error?.response?.status         || 400;
             const message = error?.response?.data?.message  || error?.message;
             switch ( status ) {
