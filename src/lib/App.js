@@ -109,9 +109,9 @@ class App {
                         const key = idOf(topic, event?.id);
                         let retry = Number(await this.bus_.get(key) || 0);
 
+                        console.error("%O.%O failed (%O of %O), %O", topic, event.id, retry, this.retries_, error.stack);
                         if ( ++retry < this.retries_ ) {
                             await this.bus_.set(key, retry);
-                            console.error("%O.%O failed, %O, retried %O of %O", topic, event.id, error.stack, retry, this.retries_);
                         } else {
                             // event -> error event
                             await this.bus_.del (key);
@@ -123,7 +123,6 @@ class App {
                                     body:    jsonOf(event?.body)
                                 },
                             });
-                            console.error("%O.%O freed, %O, retried %O of %O", topic, event.id, error.message, retry, this.retries_);
                         }
                     }
                 } // for ( const event of events )
