@@ -109,7 +109,7 @@ class App {
                         const key = idOf(topic, event?.id);
                         let retry = Number(await this.bus_.get(key) || 0);
 
-                        console.error("%O.%O failed (%O of %O), %O", topic, event.id, retry, this.retries_, error.stack);
+                        console.error("%O.%O failed %O of %O, %O", topic, event.id, retry, this.retries_, error.stack);
                         if ( ++retry < this.retries_ ) {
                             await this.bus_.set(key, retry);
                         } else {

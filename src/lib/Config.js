@@ -1,15 +1,15 @@
 'use strict'
 
 const NETWORK_TYPE = {
-    SHARED:  'SHARED',
-    PRIVATE: 'PRIVATE'
+    SHARED:     'SHARED',
+    PRIVATE:    'PRIVATE'
 }
 const CLUSTER_STATUS = {
-    IDLE:               'IDLE',
-    DEPLOYED:           'DEPLOYED',
-    STARTED:            'STARTED',
-    HALTED:             'HALTED',
-    STOPPED:            'STOPPED'
+    IDLE:       'IDLE',
+    DEPLOYED:   'DEPLOYED',
+    STARTED:    'STARTED',
+    HALTED:     'HALTED',
+    STOPPED:    'STOPPED'
 }
 const IDLE = {
     STRATEGY: 5
@@ -17,8 +17,8 @@ const IDLE = {
 const RETRY = {
     STRATEGY: 2
 }
-const POLL_SIZE     = 50
-const BLOCK_PERIOD  = 500
+const POLL_SIZE    = 50
+const BLOCK_PERIOD = 500
 const CACHE = {
     DATA_EXPIRY: 10000,
     USER_EXPIRY: 600000,   
