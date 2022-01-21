@@ -7,9 +7,9 @@ const { App } = require('./App');
 class Cluster {
     constructor(
         network_type = NETWORK_TYPE.SHARED,
-        idle_ms = 0,
+        idle         = 0,
     ) {
-        if ( typeof idle_ms != 'number' || idle_ms < 0 ) { throw new EvalError(`invalid idle_ms ${idle_ms}`); }
+        if ( typeof idle != 'number' || idle < 0 ) { throw new EvalError(`invalid idle ${idle}`); }
 
         switch( network_type ) {
             case NETWORK_TYPE.SHARED:
@@ -21,7 +21,7 @@ class Cluster {
         }
         this.apps_      = [];
         this.state_     = CLUSTER_STATUS.IDLE;
-        this.idle_      = idle_ms;
+        this.idle_      = idle;
         this.id_        = uuid.v4();
         console.log('cluster %O created, idle_strategy: %O ms', this.id_, this.idle_);
     }
