@@ -85,7 +85,7 @@ class App {
         if ( !streams?.length ) { console.warn("topic %O drained", this.topic_); }
         else {
             for ( const [ topic, events ] of streams ) { // `topic` should equal to ${topic[i]}
-                let yes = true;
+                let next = true;
                 for ( const event of events ) { 
                     try {
                         switch ( this.reactor_.on.constructor.name ) {
@@ -94,7 +94,7 @@ class App {
                         }
                         await this.bus_.free(topic, event.id);
 
-                        if ( yes ) {
+                        if ( next ) {
                             // update last processed event_id if all succeeded
                             if ( Array.isArray(this.topic_) ) {
                                 const index = this.topic_.length > 1 ? this.topic_.findIndex(name => name == topic) : 0;
@@ -104,7 +104,7 @@ class App {
                             }
                         }
                     } catch( error ) {
-                        yes = false;
+                        next = false;
                         const key = idOf(topic, event?.id);
                         let retry = Number(await this.bus_.get(key) || 0);
 
