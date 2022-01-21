@@ -61,8 +61,8 @@ class Reactor {
 
         // send data via callback
         const url = body?.callback;
-        if      ( !url?.length ) { console.warn('no callback specified per %O.%O, data will not be sent', topic, event.id); }
-        else if ( !this_data   ) { console.warn('no data recovered per %O.%O, callback will not be hit',  topic, event.id); }
+        if      ( !url?.length ) { console.warn('%O.%O: no callback specified, data will not be sent', topic, event.id); }
+        else if ( !this_data   ) { console.warn('%O.%O: no data recovered, callback will not be hit',  topic, event.id); }
         else {
             try {
                 const res = await axios.post(url, this_data)
