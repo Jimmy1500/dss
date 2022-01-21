@@ -41,12 +41,12 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null
 
             const res = await axios.get(url);
             await bus.set(key, { data: res?.data, expiry: Date.now() + expiry });
-            console.log(`(%O) %O, data %O updated for %O, expires in %Os`, res?.status, url, key, topic, expiry/1000);
+            console.log(`(%O) %O, cache %O.%O updated, expires in %Os`, res?.status, url, topic, key, expiry/1000);
             return res?.data;
         } catch ( error ) {
-            console.error('api failed, %O', error.stack);
             const status  = error?.response?.status         || 400;
             const message = error?.response?.data?.message  || error?.message;
+            console.error('$(%O) api failed, %O', status, error.stack);
             switch ( status ) {
                 case 403: throw new EvalError(`(${status}) api forbidden, ${message}`);
                 case 404:
