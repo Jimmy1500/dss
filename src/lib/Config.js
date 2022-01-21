@@ -12,17 +12,23 @@ const CLUSTER_STATUS = {
     STOPPED:    'STOPPED'
 }
 const IDLE = {
-    STRATEGY: 5
+    PLAN: 5
 }
 const RETRY = {
-    STRATEGY: 2
+    PLAN: 2
 }
-const POLL_SIZE    = 50
-const BLOCK_PERIOD = 500
+const POLL = {
+    PLAN: 50
+}
+const BLOCK = {
+    PLAN: 500
+}
 const CACHE = {
-    DATA_EXPIRY: 10000,
-    USER_EXPIRY: 600000,   
-    REPO_EXPIRY: 400000,
+    EXPIRY: {
+        DATA: 10000,
+        USER: 600000,
+        REPO: 400000,
+    }
 }
 
 
@@ -59,8 +65,8 @@ module.exports = {
     CLUSTER_STATUS,
     IDLE,
     RETRY,
-    POLL_SIZE,
-    BLOCK_PERIOD,
+    POLL,
+    BLOCK,
     CACHE,
     LOCALE,
     REDIS,

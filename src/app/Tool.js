@@ -17,12 +17,12 @@ async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null
         const value = jsonOf(val);
         if ( !value?.data || !value?.expiry ) {
             await bus.del(key);
-            console.warn(`data %O purged for %O, no data or expiry specified`, key, topic);
+            console.warn(`cache %O purged for %O, no data or expiry specified`, key, topic);
         } else if ( value.expiry > Date.now() ) {
-            console.warn(`data %O valid for %O, expires in %Os`, key, topic, (value.expiry - Date.now())/1000);
+            console.warn(`cache %O valid for %O, expires in %Os`, key, topic, (value.expiry - Date.now())/1000);
             return value?.data;
-        } else { console.warn(`data %O expired for %O`, key, topic); }
-    } else { console.warn(`no data %O exists for %O`, key, topic); }
+        } else { console.warn(`cache %O expired for %O`, key, topic); }
+    } else { console.warn(`no cache %O exists for %O`, key, topic); }
 
     // refresh data if source api url is specified
     if ( url?.length ) {
