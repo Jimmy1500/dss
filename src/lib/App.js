@@ -50,7 +50,7 @@ class App {
     id()          { return this.id_; }
     network()     { return this.bus_; }
     wire(reactor) {
-        if ( typeof reactor?.on != 'function' ) { throw new EvalError(`invalid reactor, ${reactor?.on} interface, must implement on(data)`); }
+        if ( typeof reactor?.on != 'function' ) { throw new EvalError(`invalid reactor interface on(data) ${reactor?.on}`); }
         this.reactor_ = reactor;
     }
 
@@ -73,7 +73,7 @@ class App {
         console.log('app %O stopped, last event id: %O', this.id_, this.last_id_);
     }
     async work() {
-        if ( !this.reactor_?.on ) { throw new EvalError(`invalid reactor, ${this.reactor_?.on} interface, must implement on(data)`); }
+        if ( !this.reactor_?.on ) { throw new EvalError(`invalid reactor interface on(data) ${reactor?.on}`); }
 
         const streams = await this.bus_.poll(this.topic_, this.last_id_, this.count_, this.block_);
         if ( !streams?.length ) { console.warn("topic %O drained", this.topic_); }
