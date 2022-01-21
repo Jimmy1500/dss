@@ -2,13 +2,15 @@
 const { Config, App, Cluster } = require('./src/lib');
 const { Reactor } = require('./src/app')
 
+const { NETWORK_TYPE, IDLE, REDIS, POLL, BLOCK, CACHE, RETRY } = Config;
+
 async function go(period = 0) {
     /* set up */
-    const fleet = new Cluster(Config.NETWORK_TYPE.SHARED, Config.IDLE.PLAN);
+    const fleet = new Cluster(NETWORK_TYPE.SHARED, IDLE.PLAN);
     const ships = [
-        new App(fleet.network(), Config.REDIS.TOPIC.M3_DATA, 0, Config.POLL.PLAN, Config.BLOCK.PLAN, Config.CACHE.EXPIRY.DATA, Config.RETRY.PLAN),
-        new App(fleet.network(), Config.REDIS.TOPIC.M3_USER, 0, Config.POLL.PLAN, Config.BLOCK.PLAN, Config.CACHE.EXPIRY.USER, Config.RETRY.PLAN),
-        new App(fleet.network(), Config.REDIS.TOPIC.M3_REPO, 0, Config.POLL.PLAN, Config.BLOCK.PLAN, Config.CACHE.EXPIRY.REPO, Config.RETRY.PLAN)
+        new App(fleet.network(), REDIS.TOPIC.M3_DATA, 0, POLL.PLAN, BLOCK.PLAN, CACHE.EXPIRY.DATA, RETRY.PLAN),
+        new App(fleet.network(), REDIS.TOPIC.M3_USER, 0, POLL.PLAN, BLOCK.PLAN, CACHE.EXPIRY.USER, RETRY.PLAN),
+        new App(fleet.network(), REDIS.TOPIC.M3_REPO, 0, POLL.PLAN, BLOCK.PLAN, CACHE.EXPIRY.REPO, RETRY.PLAN)
         /* ... */
     ]
 
