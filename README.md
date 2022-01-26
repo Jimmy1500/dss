@@ -75,7 +75,7 @@ This service has an active, single-threaded event driven mechanism that performs
     * cluster deploys and schedules app(s) via well defined interface
     * each app handles event(s) from one or more topic(s), updates and validates cache(s) per configurations, then sends data to callback if applicable
 ### Design Emphasis
-* Event driven microservice cluster
+* Async event driven microservice cluster
 * Unified messaging & caching interface
 * Infinite horizontal scalability
 * Efficient vertical scalability
