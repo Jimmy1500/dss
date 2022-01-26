@@ -54,7 +54,7 @@ class Reactor {
                     break;
                 }
                 default: {
-                    throw new EvalError('unrecognized event %O.%O', topic, event);
+                    throw new EvalError(`unrecognized event ${topic}.${event}`);
                 }
             }
         }
