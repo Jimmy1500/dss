@@ -39,24 +39,30 @@ if [ $arch == "Linux_x86_64" -o $arch == "Darwin_x86_64" ]; then
         docker volume rm $(docker volume ls -q)
     fi
 
+    docker builder prune --force --all
     docker-compose up --build -d
 
     echo "checking health..."
-    aws_container_up=`docker ps -a | grep -i 'localstack:latest' | grep 'Up' | gawk 'BEGIN{}{}END{ print $NF; }'`
-    if [[ ${aws_container_up} ]]; then
-        echo "container ${aws_container_up} is up!"
-        sleep 8
-    else
-        aws_container_down=`docker ps -a | grep -i 'localstack:latest' | grep 'Exited' | gawk 'BEGIN{}{}END{ print $NF; }'`
-        if [[ ${aws_container_down} ]]; then
-            echo "health check failed, container \"${aws_container_down}\" is down";
+    aws=`docker ps -a | grep -i 'localstack'`
+    aws_up=`docker ps -a | grep -i 'localstack' | grep 'Up' | gawk 'END{ print $NF; }'`
+    aws_down=`docker ps -a | grep -i 'localstack' | grep 'Exited' | gawk 'END{ print $NF; }'`
+    if [[ ${aws} ]]; then
+        if [[ ${aws_up} ]]; then
+            echo -n "container up: \"${aws_up}\", initializing..."
+            sleep 5
+            aws --no-sign-request --endpoint-url=http://localhost:4566 s3 mb s3://dss
+        elif [[ ${aws_down} ]]; then
+            echo "container down: \"${aws_down}\""
+            exit 1
         else
-            echo "health check failed, container doesn't exist";
+            echo "container invalid state: \"${aws}\""
+            exit 1
         fi
+    else
+        echo "no container exists";
         exit 1
     fi
 
-    aws --no-sign-request --endpoint-url=http://localhost:4566 s3 mb s3://m3-api
 else
     echo $windows_warning_msg
     exit 1

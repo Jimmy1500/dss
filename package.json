@@ -1,12 +1,12 @@
 {
-  "name": "m3",
+  "name": "dss",
   "version": "1.0.0",
-  "description": "NodeJS Demo",
+  "description": "Document Scrapping Service",
   "main": "index.js",
-  "repository": "git@github.com:Jimmy1500/m3.git",
-  "author": "James Ding <james.ding.illinois@gmail.com>",
-  "license": "GPL-3.0",
-  "private": false,
+  "repository": "git@gitlab.com:traive-finance/app/dss.git",
+  "author": "James Ding <james.ding@traivefinance.com>",
+  "license": "proprietary",
+  "private": true,
   "scripts": {
     "app": "nodemon index.js",
     "sls": "sls offline -c serverless.yml",
@@ -15,14 +15,17 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.15",
+    "serverless": "^3.1.1",
     "serverless-domain-manager": "^5.3.0",
     "serverless-dotenv-plugin": "^3.12.2",
     "serverless-localstack": "^0.4.35",
     "serverless-offline": "^8.3.1"
   },
   "dependencies": {
+    "aws-sdk": "^2.1072.0",
     "axios": "^0.24.0",
     "ioredis": "^4.28.3",
+    "playwright": "^1.18.1",
     "uuid": "^8.3.2"
   }
 }

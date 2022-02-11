@@ -1,23 +1,17 @@
 'use strict'
-const { NETWORK_TYPE, REDIS } = require('./Config');
-const { uuid, jsonOf, hashOf } = require('./Util');
-const { Bus } = require('./Bus');
-
-function idOf(topic, event_id) {
-    if ( !topic?.length ) { throw new EvalError(`invalid topic ${topic}`); }
-    if ( !event_id?.length  ) { throw new EvalError(`invalid event_id ${event_id}`); }
-    return hashOf(`retry.${topic}.${event_id}`);
-}
+const { config, Bus, uuid, jsonOf, idOf, checkBrowser, browse } = require('../lib');
+const { NETWORK_TYPE, REDIS } = config;
 
 class App {
     constructor(
         bus,
+        browser,
         topic,
         last_id = 0,
-        count   = 50,
-        block   = 0,
-        expiry  = 300000,
-        retries = 1,
+        count   = 50     | 0,
+        block   = 0      | 0,
+        expiry  = 300000 | 0,
+        retries = 1      | 0,
     ) {
         if ( typeof topic    != 'string' && !Array.isArray(topic)   ) { throw new EvalError(`invalid topic ${topic}`);     }
         if ( typeof last_id  != 'number' && !Array.isArray(last_id) ) { throw new EvalError(`invalid last_id ${last_id}`); }
@@ -25,6 +19,7 @@ class App {
         if ( typeof block    != 'number'   || block   <  0          ) { throw new EvalError(`invalid block ${block}`);     }
         if ( typeof expiry   != 'number'   || expiry  <  0          ) { throw new EvalError(`invalid expiry ${expiry}`);   }
         if ( typeof retries  != 'number'   || retries <  0          ) { throw new EvalError(`invalid retries ${retries}`); }
+        checkBrowser(browser);
 
         if ( !bus ) {
             this.bus_          = new Bus();
@@ -35,13 +30,13 @@ class App {
         } else {
             throw new TypeError('bus must be instance of Bus');
         }
-        
+        this.browser_ = browser;
         this.topic_     = topic;
         this.last_id_   = topic?.length === last_id?.length ? last_id : ( Array.isArray(topic) ? Array(topic?.length).fill(0) : 0 );
-        this.count_     = count;
-        this.block_     = block;
-        this.expiry_    = expiry;
-        this.retries_   = retries;
+        this.count_     = count   | 0;
+        this.block_     = block   | 0;
+        this.expiry_    = expiry  | 0;
+        this.retries_   = retries | 0;
         this.id_        = uuid.v4();
         console.log('app %O created, topic: %O, network type: %O', this.id_, this.topic_, this.network_type_);
     }
@@ -57,21 +52,27 @@ class App {
     async start() {
         switch (this.network_type_) {
             case NETWORK_TYPE.PRIVATE:
+                if ( !this.bus_ ) { throw new EvalError(`app ${this.id()} cannot connect, invalid private network ${this.bus_}`); }
                 this.bus_.connect({ port: REDIS.PORT, host: REDIS.HOST, db: 0, /* username: , password: */ });
+                console.log('app network connected');
                 break;
             default: break;
         }
         console.log('app %O started', this.id_);
     }
+
     async stop() {
         switch (this.network_type_) {
             case NETWORK_TYPE.PRIVATE:
+                if ( !this.bus_ ) { throw new EvalError(`app ${this.id()} cannot disconnect, invalid private network ${this.bus_}`); }
                 this.bus_.disconnect();
+                console.log('app network disconnected');
                 break;
             default: break;
         }
         console.log('app %O stopped, last event id: %O', this.id_, this.last_id_);
     }
+
     async work() {
         if ( !this.reactor_?.on ) { throw new EvalError(`invalid reactor interface on(data) ${reactor?.on}`); }
 
@@ -79,12 +80,14 @@ class App {
         if ( !streams?.length ) { console.warn("topic %O drained", this.topic_); }
         else {
             for ( const [ topic, events ] of streams ) { // `topic` should equal to ${topic[i]}
+                const { context, page } = await browse(topic, this.browser_);
+
                 let next = true;
                 for ( const event of events ) { 
                     try {
                         switch ( this.reactor_.on.constructor.name ) {
-                            case 'AsyncFunction': await this.reactor_.on({ topic: topic, event: event, expiry: this.expiry_ }); break;
-                            default:                    this.reactor_.on({ topic: topic, event: event, expiry: this.expiry_ }); break;
+                            case 'AsyncFunction': await this.reactor_.on({ topic: topic, event: event, expiry: this.expiry_, page: page }); break;
+                            default:                    this.reactor_.on({ topic: topic, event: event, expiry: this.expiry_, page: page }); break;
                         }
                         await this.bus_.free(topic, event.id);
 
@@ -99,7 +102,7 @@ class App {
                         }
                     } catch( error ) {
                         next = false;
-                        const key = idOf(topic, event?.id);
+                        const key = idOf('retry', [topic, event?.id]);
                         let retry = Number(await this.bus_.get(key) || 0);
 
                         if ( ++retry < this.retries_ ) {
@@ -111,7 +114,7 @@ class App {
                             await this.bus_.push(topic, {
                                 error: {
                                     code:    'FAILURE',
-                                    message: `cannot handle request, retried ${retry} of ${this.retries_}`,
+                                    message: `cannot handle request, ${error.message}, retried ${retry} of ${this.retries_}`,
                                     body:    jsonOf(event?.body)
                                 },
                             });
@@ -119,7 +122,10 @@ class App {
                         console.error("%O.%O failed %O of %O, %O", topic, event.id, retry, this.retries_, error.stack);
                     }
                 } // for ( const event of events )
-            }
+
+                if ( page    ) { await page.close();    }
+                if ( context ) { await context.close(); }
+            } // for ( const [ topic, events ] of streams ) { // `topic` should equal to ${topic[i]}
         }
     }
 }

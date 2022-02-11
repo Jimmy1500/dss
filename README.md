@@ -1,4 +1,4 @@
-# Project M3
+# Project DSS
 
 ## How to Start
 ### Container (Recommended)
@@ -30,22 +30,15 @@
 ```
 curl -X GET --url http://localhost:4000/dev/health
 ```
-* Sync API (getDataSync)
-> this returns data (or error) synchronously as the response of this call
-```
-curl -X POST --url http://localhost:4000/dev/data/sync --data '{"user": "octocat"}'
-```
-* Async API (getDataAsync)
+* Async API (getData)
 > this returns data (or error) asynchronously via callback url if specified in request,  
-> please monitor sls & app logs to observe what happens
 ```
-curl -X POST --url http://localhost:4000/dev/data/async --data '{"user": "octocat", "callback": "http://sls:4000/dev/callback"}'
+curl -X POST --url http://localhost:4000/dev/data --data '{"type": "DSS_IBM_EC", "tax_id": "01837060487", "callback": "http://localhost:5000/callback" }'
 ```
-### Option 2: `get_data.sh`
-> feeling lazy? got you covered!  
-> use `bin/get_data.sh` instead to avoid headaches of typing/copy+paste:
+### Option 2: `./bin/curl.sh`
+* Async API (getData)
 ```
-./bin/get_data.sh --help
+./bin/curl.sh
 ```
 
 ## Service Endpoints
@@ -54,11 +47,10 @@ curl -X POST --url http://localhost:4000/dev/data/async --data '{"user": "octoca
 ```
 http://localhost:4000/dev
 ```
-| API                                                    | Method | URL           | Description           | Example Request                                                    |
-| :----------------------------------------------------: | :----: | :-----------: | :-------------------: | :---------------------------------------------------------------:  |
-| [Health](http://localhost:4000/dev/health)             | GET    | /health       | health check          | `N/A`                                                              |
-| [Sync API](http://localhost:4000/dev/data/sync)   | POST   | /data/sync    | get data (sync mode)  | `{"user": "octocat"}`                                              |
-| [Async API](http://localhost:4000/dev/data/async) | POST   | /data/async   | get data (async mode) | `{"user": "octocat", "callback": "http://sls:4000/dev/callback" }` |
+| API                                         | Method | URL     | Description     | Example Request                                                                                  |
+| :-----------------------------------------: | :----: | :-----: | :-------------: | :----------------------------------------------------------------------------------------------: |
+| [Health](http://localhost:4000/dev/health)  | GET    | /health | health check    | `N/A`                                                                                            |
+| [Async API](http://localhost:4000/dev/data) | POST   | /data   | get data(async) | `{"type": "DSS_IBM_EC", "tax_id": "01837060487", "callback": "http://localhost:5000/callback" }` |
 
 ## Architecture
 ### Introduction
@@ -69,7 +61,7 @@ This service has an active, single-threaded event driven mechanism that performs
 ### Primary Components
 * [Diagram](arch/app.png)
 * Lambda:
-    * hosts stateless api endpoints (health, getDataSync, getDataAsync, callback), serves request(s) and emits event(s) to messaging
+    * hosts stateless api endpoints (health, getData), serves request(s) and emits event(s) to message mesh
 * App Cluster:
     * hosts long running node application
     * cluster deploys and schedules app(s) via well defined interface
@@ -90,16 +82,16 @@ This service has an active, single-threaded event driven mechanism that performs
 * Scheduler (Cluster) operates as finite-state machine 
 * Worker(s) (App) act on event(s) per reactor (Reactor) implementation (user defined)
 ### User Interfaces
+* App (Worker)
+    * wire(reactor: Reactor)
+    * start()
+    * stop()
+    * work()
 * Reactor (Reactor)
     * on(data: object)
 ### Framework Intefaces
 * Cluster (Scheduler)
     * deploy(apps: App | App[])
-    * start()
-    * stop()
-    * work()
-* App (Worker)
-    * wire(reactor: Reactor)
     * start()
     * stop()
     * work()

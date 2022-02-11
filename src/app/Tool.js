@@ -1,104 +1,147 @@
 'use strict'
-const { axios, jsonOf, hashOf } = require('../lib')
+const { config, jsonOf, idOf } = require('../lib');
 
-function idOf(topic, user) {
-    if ( !topic?.length ) { throw new EvalError(`invalid topic ${topic}`); }
-    if ( !user?.length  ) { throw new EvalError(`invalid user ${user}`); }
-    return hashOf(`data.${topic}.${user}`);
+/* TODO: S3 operation patterns
+const { AWS } = require('../lib');
+const fs = require("fs");
+
+const aws    = new AWS(config.AWS.REGION, config.AWS.API_VERSION, config.AWS.S3.HOST);
+const bucket = config.AWS.S3.BUCKET;
+const files  = ['./file1.txt', './file2.txt'];
+const zipped = 'zipped.zip';
+
+for ( const key of files ) {
+    if ( !await aws.s3().exists(bucket, key) ) { throw new EvalError(`no ${key} exists in ${bucket}`); }
+    const file = {
+        name: key,
+        mimetype: 'application/txt',
+        buffer: fs.readFileSync(key)
+    }
+    await aws.s3().upload(bucket, file, true);
 }
 
-// get valid data, or get data from source api (refreshes data) with rate limit check (optional)
-async function cacheOf(bus, topic, user, expiry = 0, url = null, rate_url = null) {
-    if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError(`invalid expiry ${expiry}`); }
-    
-    const key = idOf(topic, user);
+await aws.s3().zip(bucket, files, zipped, true);
+await aws.s3().delete(bucket, files);
+*/
+
+/* raw doc data -> doc data per API contract (per topic) */
+async function docOf(topic, raw_doc) {
+    if ( !topic?.length ) { throw new EvalError(`invalid topic ${topic}`);     }
+    if ( !raw_doc       ) { throw new EvalError(`invalid raw_doc ${raw_doc}`); }
+
+    /* TODO */
+    switch( topic ) {
+        case config.REDIS.TOPIC.DSS_AMZ_PT:
+        case config.REDIS.TOPIC.DSS_IBM_EC:
+        case config.REDIS.TOPIC.DSS_CRT_PF:
+        case config.REDIS.TOPIC.DSS_CRT_PJ:
+            /* [ {
+                ds_remarks: pdf[15],
+                ds_farmer_name: pdf[11],
+                nr_cpf_cnpj: pdf[13],
+                ds_certificate_number: pdf[5],
+                ds_certificate_type: 'Negativa',
+            } ] */
+            return raw_doc;
+        default: throw new EvalError(`invalid topic ${topic}`);
+    }
+}
+
+async function dataOf(bus, topic, body, page) {
+        if ( !bus                      ) { throw new EvalError(`invalid bus ${bus}`);     }
+        if ( !topic?.length            ) { throw new EvalError(`invalid topic ${topic}`); }
+        if ( !page || page?.isClosed() ) { throw new EvalError(`invalid page ${page}`);   }
+
+        const tax_id = body?.tax_id?.trim();
+        const page_url = page.url();
+        if ( !tax_id?.length           ) { throw new EvalError(`invalid body ${body}, no tax_id ${tax_id}`); }
+        if ( !page_url?.length         ) { throw new EvalError(`invalid page ${page}, no url ${page_url}`);  }
+
+        switch ( topic ) {
+            case config.REDIS.TOPIC.DSS_AMZ_PT: { return body; }
+            case config.REDIS.TOPIC.DSS_IBM_EC: {
+                await page.locator('id=sit_isencao_lic_transporte_E').click();
+                await page.locator('id=sit_desmatamento_T').click();
+                await page.fill   ('id=num_cpf_cnpj', tax_id);
+                await page.locator('id=Emitir_Certificado').click();
+
+                await bus.wait(1000);
+                const doc_url = await page.evaluate(() => {
+                    const iframe = document.querySelector("iframe#iframe_formdin_area_sub_1");
+                    for ( const attr of iframe?.attributes ) {
+                        if ( attr?.nodeName === 'src' ) { return attr?.nodeValue; }
+                        else { continue; }
+                    }
+                    return null;
+                });
+
+                if ( !doc_url?.length ) { throw new EvalError(`invalid doc_url ${url} per topic ${topic}`); }
+                await page.goto( doc_url );
+
+                await bus.wait(1000);
+                const raw_doc = await page.evaluate(() => {
+                    const spans = document.querySelectorAll("div#viewer.pdfViewer > div.page > div.textLayer > span");
+                    const doc = [];
+                    for ( const span of spans ) {
+                        const txt = span.innerText?.trim();
+                        if ( txt?.length ) { doc.push(txt); }
+                    }
+                    return doc;
+                });
+
+                await page.goto( page_url );
+                return { ...body, data: { document: await docOf(topic, raw_doc) } };
+            }
+            case config.REDIS.TOPIC.DSS_CRT_PF:
+            case config.REDIS.TOPIC.DSS_CRT_PJ: { return body; }
+            default: throw new EvalError(`invalid topic ${topic}`);
+        }
+    }
+
+// get valid cache, or get data from source (updates cache optionally)
+async function cacheOf(bus, topic, body = null, expiry = 0, page = null) {
+    const tax_id = body?.tax_id?.trim();
+    if ( !tax_id?.length ) { throw new EvalError(`invalid tax_id ${tax_id} in body ${body}`); }
+    if ( !topic?.length  ) { throw new EvalError(`invalid topic ${topic}`);                   }
+
+    const prefix = 'cache';
+    const key = idOf(prefix, [topic, tax_id]);
     const val = await bus.get(key);
     if ( val ) {
-        const value = jsonOf(val);
-        if ( !value?.data || !value?.expiry ) {
+        const cache = jsonOf(val);
+        if ( !cache?.data || !cache?.expiry ) {
             await bus.del(key);
             console.warn(`cache %O purged for %O, no data or expiry specified`, key, topic);
-        } else if ( value.expiry > Date.now() ) {
-            console.warn(`cache %O valid for %O, expires in %Os`, key, topic, (value.expiry - Date.now())/1000);
-            return value?.data;
+        } else if ( cache.expiry > Date.now() ) {
+            console.warn(`cache %O valid for %O, expires in %Os`, key, topic, (cache.expiry - Date.now())/1000);
+            return cache?.data;
         } else { console.warn(`cache %O expired for %O`, key, topic); }
     } else { console.warn(`no cache %O exists for %O`, key, topic); }
 
-    // refresh data if source api url is specified
-    if ( url?.length ) {
-        try {
-            if ( rate_url?.length ) {
-                const usage     = await axios.get(rate_url);
-                const rate      = usage?.data?.rate;
-                const limit     = rate?.limit     ?? 'N/A';
-                const remaining = rate?.remaining ?? 0;
-                const reset     = rate?.reset     ?? 'N/A';
-                const used      = rate?.used      ?? 'N/A'
-
-                if ( !remaining ) { throw new EvalError(`rate limit reached ${used} of ${limit}, resets in ${reset}s`); }
-                console.log(`(%O) rate limit used %O of %O, %O left, resets in %Os`, usage.status, used, limit, remaining, reset);
-            }
-
-            const res = await axios.get(url);
-            await bus.set(key, { data: res?.data, expiry: Date.now() + expiry });
-            console.log(`(%O) %O, cache %O.%O updated, expires in %Os`, res?.status, url, topic, key, expiry/1000);
-            return res?.data;
-        } catch ( error ) {
-            const status  = error?.response?.status         || 400;
-            const message = error?.response?.data?.message  || error?.message;
-            console.error('$(%O) api failed, %O', status, error.stack);
-            switch ( status ) {
-                case 403: throw new EvalError(`(${status}) api forbidden, ${message}`);
-                case 404:
-                    switch ( message ) {
-                        case 'Not Found': throw new EvalError(`(${status}) user '${user}' not found`);
-                        default:          throw new EvalError(`(${status}) api offline, ${message}`);
-                    }
-                default:                  throw new EvalError(`(${status}) api failed, ${message}`);
-            }
-        }
+    // update cache per doc type (topic)
+    if ( page ) {
+        const data = await dataOf(bus, topic, body, page);
+        await stash(bus, prefix, [topic, tax_id], data, expiry);
+        return data;
     }
     return null;
 }
 
 // stash data
-async function stash(bus, topic, user, data, expiry = 0) {
+async function stash(bus, prefix, ids, data, expiry = 0) {
     if ( !data                                   ) { throw new EvalError(`invalid data ${data}`);     }
     if ( typeof expiry != 'number' || expiry < 0 ) { throw new EvalError(`invalid expiry ${expiry}`); }
-    if ( expiry ) {
-        const key = idOf(topic, user);
+    else if ( expiry ) {
+        const key = idOf(prefix, ids);
         const val = { data: data, expiry: Date.now() + expiry };
         await bus.set(key, val);
+        console.log(`cache %O stashed for %O, expires in %Os`, key, ids, expiry/1000);
     }
 }
 
-// merge user data and repo data into final output (view)
-async function merge(user, user_data, repo_data) {
-    if ( typeof user != 'string' || !user?.length ) { throw new EvalError(`invalid ${user}`); }
-    if ( !user_data ) { throw new EvalError(`invalid user_data`); }
-    if ( !repo_data ) { throw new EvalError(`invalid repo_data`); }
-
-    return {
-        user_name:      user_data?.login,
-        display_name:   user_data?.name ,
-        avatar:         user_data?.avatar_url,
-        geo_location:   user_data?.location,
-        email:          user_data?.email,
-        url:            user_data?.url,
-        created_at:     (user_data?.created_at || new Date().toISOString()).replace('T', ' ').replace('Z', ''),
-        repos:          repo_data?.map(r => {
-            return {
-                name: r?.name,
-                url:  r?.html_url
-            }
-        }),
-        code: 'SUCCESS',
-        message: `data recovered for user '${user}'`,
-    };
-}
-
 module.exports = {
+    docOf,
+    dataOf,
     cacheOf,
     stash,
-    merge,
 }

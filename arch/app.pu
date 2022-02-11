@@ -5,8 +5,8 @@ node User {
     component Request
 }
 
-node GitHub{
-    component GitHubAPI
+node Website {
+    component XYZ.gov
 }
 
 node AWS {
@@ -56,7 +56,7 @@ Callback <-down- App3
 EgressGateway <--up--> App1
 EgressGateway <--up--> App2
 EgressGateway <--up--> App3
-GitHubAPI <-left-> EgressGateway
+XYZ.gov <-left-> EgressGateway
 
 Bus <--up->  App1
 Bus <--up->  App2

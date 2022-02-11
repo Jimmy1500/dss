@@ -1,5 +1,6 @@
-service: m3-api
+service: dss-api
 
+frameworkVersion: "3"
 plugins:
   - serverless-localstack
   - serverless-offline
@@ -12,8 +13,7 @@ custom:
     httpPort: 4000
   localstack:
     host: http://localhost # optional - LocalStack host to connect to
-    edgePort: 4566 # optional - LocalStack edge port to connect to
-frameworkVersion: "2"
+    edgePort: 4566         # optional - LocalStack edge port to connect to
 
 provider:
   name: aws
@@ -32,7 +32,6 @@ functions:
           method: get
           path: /health
           cors: true
-          timeout: 30
           request:
             parameters:
               querystrings:
@@ -40,22 +39,12 @@ functions:
           response:
             headers:
               Content-Type: "'application/json'"
-  data_sync:
-    handler: sls/Lambda.getDataSync
+  get_doc:
+    handler: sls/Lambda.getDoc
     events:
       - http:
           method: post
-          path: /data/sync
-          cors: true
-          response:
-            headers:
-              Content-Type: "'application/json'"
-  data_async:
-    handler: sls/Lambda.getDataAsync
-    events:
-      - http:
-          method: post
-          path: /data/async
+          path: /doc
           cors: true
           response:
             headers:
@@ -67,11 +56,6 @@ functions:
           method: post
           path: /callback
           cors: true
-          timeout: 30
-          request:
-            parameters:
-              querystrings:
-                url: true
           response:
             headers:
               Content-Type: "'application/json'"
