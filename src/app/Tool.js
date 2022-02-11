@@ -110,14 +110,14 @@ async function cacheOf(bus, topic, body = null, expiry = 0, page = null) {
     if ( val ) {
         const cache = jsonOf(val);
         if ( !cache?.data || !cache?.expiry ) {
-            await bus.del(key);
             console.warn(`cache %O purged for %O, no data or expiry specified`, key, topic);
+            await bus.del(key);
         } else if ( cache.expiry > Date.now() ) {
             console.warn(`cache %O valid for %O, expires in %Os`, key, topic, (cache.expiry - Date.now())/1000);
             return cache?.data;
         } else {
-            await bus.del(key);
             console.warn(`cache %O purged for %O, expired`, key, topic);
+            await bus.del(key);
         }
     } else { console.warn(`no cache %O exists for %O`, key, topic); }
 
