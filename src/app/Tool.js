@@ -115,7 +115,10 @@ async function cacheOf(bus, topic, body = null, expiry = 0, page = null) {
         } else if ( cache.expiry > Date.now() ) {
             console.warn(`cache %O valid for %O, expires in %Os`, key, topic, (cache.expiry - Date.now())/1000);
             return cache?.data;
-        } else { console.warn(`cache %O expired for %O`, key, topic); }
+        } else {
+            await bus.del(key);
+            console.warn(`cache %O purged for %O, expired`, key, topic);
+        }
     } else { console.warn(`no cache %O exists for %O`, key, topic); }
 
     // update cache per doc type (topic)
