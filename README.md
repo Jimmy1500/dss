@@ -32,11 +32,13 @@ curl -X GET --url http://localhost:4000/dev/health
 ```
 * Async API (getData)
 > this returns data (or error) asynchronously via callback url if specified in request,  
+> please monitor sls & app logs `docker logs -f sls/app` to observe what happens
 ```
 curl -X POST --url http://localhost:4000/dev/data --data '{"type": "DSS_IBM_EC", "tax_id": "01837060487", "callback": "http://localhost:5000/callback" }'
 ```
-### Option 2: `./bin/curl.sh`
-* Async API (getData)
+### Option 2: `curl.sh`
+> feeling lazy? got you covered!  
+> use `bin/curl.sh` instead to avoid headaches of typing/copy+paste:
 ```
 ./bin/curl.sh
 ```
