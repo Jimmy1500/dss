@@ -115,8 +115,8 @@ class Cluster {
                 }
                 if ( next && this.idle_ ) { await this.wait(this.idle_); }
             } catch ( error )  {
-                next = false;
                 console.error('cluster error, %O', error.stack);
+                next = false;
                 break;
             }
         } while ( next );
