@@ -113,7 +113,7 @@ class Cluster {
                     case CLUSTER_STATUS.STOPPED:    next = false;       break;
                     default: throw new EvalError(`cannot run cluster, invalid cluster state: ${this.state_}`);
                 }
-                if ( this.idle_ ) { await this.wait(this.idle_); }
+                if ( next && this.idle_ ) { await this.wait(this.idle_); }
             } catch ( error )  {
                 next = false;
                 console.error('cluster error, %O', error.stack);
