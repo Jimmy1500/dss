@@ -25,8 +25,8 @@ class Cluster {
     }
 
     /* --------------- primary interface --------------- */
-    id()          { return this.id_; }
-    network()     { return this.bus_; }
+    id()          { return this.id_;      }
+    network()     { return this.bus_;     }
     browser()     { return this.browser_; }
     report(status){ this.state_ = status; }
     halt()        { this.report(CLUSTER_STATUS.HALTED); }
@@ -76,9 +76,9 @@ class Cluster {
         switch(this.state_) {
             case CLUSTER_STATUS.STARTED:
             case CLUSTER_STATUS.HALTED:
-                for ( const app of this.apps_       ) { await app.stop(); }
-                if  ( this.browser_.isConnected()   ) { await this.browser_.close(); console.log('cluster browswer closed'); }
-                if  ( this.bus_                     ) { this.bus_.disconnect(); console.log('cluster network disconnected'); }
+                for ( const app of this.apps_     ) { await app.stop(); }
+                if  ( this.browser_.isConnected() ) { await this.browser_.close(); console.log('cluster browswer closed'); }
+                if  ( this.bus_                   ) { this.bus_.disconnect(); console.log('cluster network disconnected'); }
                 this.report(CLUSTER_STATUS.STOPPED);
                 break;
             default: throw new EvalError(`cannot stop cluster, invalid cluster state: ${this.state_}`);
