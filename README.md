@@ -57,9 +57,9 @@ http://localhost:4000/dev
 ## Architecture
 ### Introduction
 This service has an active, single-threaded event driven mechanism that performs:
-* cache validation per individual expiry configuration
-* data retrieval from source api
-* individual cache update per user data, repo data and merged data (user + repo)
+* cache data validation per individual expiry configuration
+* cache data update per document type
+* data retrieval from source website
 ### Primary Components
 * [Diagram](arch/app.png)
 * Lambda:
