@@ -20,19 +20,19 @@ function idOf(prefix, ids) {
 }
 
 async function browserOf( browser_type = null, headless = true ) {
+    const launch_option = { headless: headless };
     switch ( browser_type ) {
-        case WEB.BROWSER.CHROME:    return await chromium.launch({ headless: headless });
-        case WEB.BROWSER.FIREFOX:   return await firefox.launch({ headless: headless });
-        case WEB.BROWSER.SAFARI:    return await webkit.launch({ headless: headless });
+        case WEB.BROWSER.CHROME:    return await chromium.launch(launch_option);
+        case WEB.BROWSER.FIREFOX:   return await firefox.launch(launch_option);
+        case WEB.BROWSER.SAFARI:    return await webkit.launch(launch_option);
         default:
             const browsers = Object.values(WEB.BROWSER);
-            const index    = Math.floor( Math.random() * (browsers?.length || 1) ); // randomly pick 1 browser type
-            const type     = browsers[index];
-            switch ( type ) {
-                case WEB.BROWSER.CHROME:    return await chromium.launch({ headless: headless });
-                case WEB.BROWSER.FIREFOX:   return await firefox.launch({ headless: headless });
-                case WEB.BROWSER.SAFARI:    return await webkit.launch({ headless: headless });
-                default: throw new EvalError(`invalid browser_type ${type}, invalid index ${index}`)
+            const pick     = Math.floor( Math.random() * (browsers?.length || 1) ); // randomly pick 1 browser type
+            switch ( browsers[pick] ) {
+                case WEB.BROWSER.CHROME:    return await chromium.launch(launch_option);
+                case WEB.BROWSER.FIREFOX:   return await firefox.launch(launch_option);
+                case WEB.BROWSER.SAFARI:    return await webkit.launch(launch_option);
+                default: throw new EvalError(`invalid browser_type ${type}, invalid index ${pick}`)
             }
     }
 }

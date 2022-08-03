@@ -5,7 +5,7 @@ const { App, Reactor } = require('./src/app');
 const { NETWORK_TYPE, IDLE, RETRY, POLL, BLOCK, CACHE, REDIS, WEB } = config;
 
 async function main(period = 0) {
-    const browser = await browserOf(WEB.ENGINE, WEB.HEADLESS);
+    const browser = await browserOf(WEB.BROWSER.FIREFOX, WEB.HEADLESS);
 
     /* set up */
     const server = new Cluster(browser, NETWORK_TYPE.SHARED, IDLE.PLAN);

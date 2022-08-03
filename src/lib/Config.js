@@ -56,7 +56,6 @@ const REDIS = {
 
 const WEB = {
     HEADLESS:       false,
-    ENGINE:         'FIREFOX',
     BROWSER : {
         CHROME:     'CHROME',
         FIREFOX:    'FIREFOX',
